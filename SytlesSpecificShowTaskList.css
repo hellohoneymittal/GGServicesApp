@@ -1,0 +1,63 @@
+/* DAY / UNIT (TOP LEVEL) */
+.task-day {
+  background: #e2c29d; /* same theme */
+  color: #5a3e1b;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-top: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+/*  PARTICULAR (SECOND LEVEL) */
+.task-particular-container {
+  margin-top: 8px;
+  margin-left: 6px;
+}
+
+.task-particular {
+  background: #f1dfc9; /* lighter than parent */
+  color: #4a3420;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 6px 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  border: 1px dashed #d8b892;
+}
+
+/*  INNER CARD (THIRD LEVEL) */
+.task-card-container {
+  margin-left: 14px;
+}
+
+.task-card {
+  background: #ffffff; /* clean white for clarity */
+  padding: 10px 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  font-size: 13px;
+  border-left: 4px solid #e2c29d;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/*  HIDDEN */
+.task-hidden {
+  display: none;
+}
+
+.task-day:hover {
+  background: #d6b58f;
+}
+
+.task-particular:hover {
+  background: #ead6bd;
+}
+.task-card > div {
+  padding: 10px;
+  font-size: 18px;
+  text-align: left !important;
+}

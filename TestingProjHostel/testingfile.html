@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devotee Service Viewer</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .service-box {
+        border: 1px solid #ccc;
+        margin-top: 10px;
+        border-radius: 5px;
+      }
+      .service-header {
+        padding: 10px;
+        cursor: pointer;
+        background-color: #f0f0f0;
+        font-weight: bold;
+      }
+      .service-details {
+        display: none;
+        padding: 10px;
+        background-color: #fafafa;
+      }
+      input[type="text"] {
+        padding: 5px;
+        width: 300px;
+      }
+      .checkbox-item {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>सेवा विवरण खोजें</h2>
+    <input
+      type="text"
+      id="devoteeName"
+      placeholder="Devotee Name (e.g., Satya Madhav Prabhu)"
+      oninput="filterServices()"
+    />
+
+    <div id="servicesContainer"></div>
+
+    <script>
+      const serviceMaster = {
+        Toilet: [
+          "टॉयलेट हमेशा साफ होना चाहिए।",
+          "टॉयलेट में पानी की व्यवस्था होनी चाहिए।",
+          "टॉयलेट में दुर्गंध ना हो – नियमित फ्रेशनर का उपयोग किया जाए।",
+          "नल, फ्लश और वॉशबेसिन सही स्थिति में हों।",
+          "टॉयलेट के दरवाज़े ठीक से बंद होने वाले और सुरक्षित हों।",
+        ],
+        Basement: [
+          "बेसमेंट साफ-सुथरा और रोशनी से युक्त हो।",
+          "अनावश्यक वस्तुएँ व्यवस्थित रूप से रखी जाएं।",
+          "सभी दरवाजे और खिड़कियां ठीक से बंद हों।",
+          "सीढ़ियाँ व प्रवेश मार्ग साफ हों।",
+          "बच्चों का खेलकूद सुरक्षित रूप से हो।",
+        ],
+        Roof: [
+          "छत पर कोई गंदगी न हो।",
+          "सामान इधर-उधर न बिखरा हो।",
+          "छत के किनारे सुरक्षित हों।",
+          "पौधों की देखभाल हो।",
+          "कूड़ा-करकट नियमित रूप से हटाया जाए।",
+        ],
+      };
+
+      const userServiceMap = {
+        "Satya Madhav Prabhuji": {
+          Sunday: ["Toilet", "Basement", "Roof"],
+          Monday: ["Toilet"],
+          Tuesday: ["Toilet"],
+          Wednesday: ["Toilet"],
+          Thursday: ["Toilet"],
+          Friday: ["Toilet"],
+          Saturday: ["Toilet"],
+        },
+        "Amani Nitai Prabhuji": {
+          Wednesday: ["Toilet"],
+        },
+      };
+
+      function filterServices() {
+        const name = document
+          .getElementById("devoteeName")
+          .value.trim()
+          .toLowerCase();
+        const container = document.getElementById("servicesContainer");
+        container.innerHTML = "";
+
+        for (let devotee in userServiceMap) {
+          if (devotee.toLowerCase().includes(name)) {
+            let services = new Set();
+            Object.values(userServiceMap[devotee]).forEach((serviceList) => {
+              serviceList.forEach((service) => services.add(service));
+            });
+
+            services.forEach((service) => {
+              const box = document.createElement("div");
+              box.className = "service-box";
+
+              const header = document.createElement("div");
+              header.className = "service-header";
+              header.textContent = service;
+              header.onclick = () => {
+                detailBox.style.display =
+                  detailBox.style.display === "none" ? "block" : "none";
+              };
+
+              const detailBox = document.createElement("div");
+              detailBox.className = "service-details";
+
+              if (serviceMaster[service]) {
+                serviceMaster[service].forEach((point) => {
+                  const checkbox = document.createElement("div");
+                  checkbox.className = "checkbox-item";
+                  checkbox.innerHTML = `<label><input type="checkbox"> ${point}</label>`;
+                  detailBox.appendChild(checkbox);
+                });
+              } else {
+                detailBox.textContent = "No details available.";
+              }
+
+              box.appendChild(header);
+              box.appendChild(detailBox);
+              container.appendChild(box);
+            });
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
