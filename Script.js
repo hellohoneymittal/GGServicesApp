@@ -4,6 +4,8 @@ const userServiceDataList = {};
 let pendingNoItems = [];
 let selectedData = [];
 let sewaKartaList = [];
+let selectedUser = null;
+
 document.addEventListener("DOMContentLoaded", async function () {
   const loginData = await DB_GET(
     INDEX_DB.storeKey,
@@ -12,23 +14,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   );
 
   if (loginData) {
-    homePageClick(loginData?.name, loginData?.role);
+    selectedUser = loginData;
+    selectedDevoteeName = loginData?.name;
+    renderMenus(loginData?.role);
   } else {
     SHOW_SPECIFIC_DIV("passwordPopup");
   }
 });
-
-function homePageClick(selectedName, roleObj) {
-  selectedDevoteeName = selectedName;
-  setUserNameOnFrontScreen(selectedDevoteeName);
-  SHOW_BUTTON_BY_ADMIN_ROLE(
-    "serviceOwnerBtn",
-    "Hostel Sewakarta Role",
-    roleObj,
-  );
-
-  SHOW_SPECIFIC_DIV("menuPopup");
-}
 
 function setUserNameOnFrontScreen(devName) {
   const loginUserDiv = document.getElementById("login-user-name-div_fp");
@@ -63,8 +55,8 @@ async function submitPass() {
         INDEX_DB.dbName,
         INDEX_DB.storeName,
       );
-
-      homePageClick(response?.data?.name, response?.data?.role);
+      selectedUser = response?.data;
+      renderMenus(response?.data?.role);
     } else {
       SHOW_ERROR_POPUP("Please input some value in password fields");
     }

@@ -1,3 +1,44 @@
+function renderMenus(roleData) {
+  SHOW_BUTTON_BY_ADMIN_ROLE(
+    "serviceOwnerBtn",
+    "Hostel Sewakarta Role",
+    roleData,
+  );
+
+  SHOW_SPECIFIC_DIV("menuPopup");
+  setUserNameOnFrontScreen(selectedUser?.name);
+}
+
+async function LOAD_HTML_FILE(fileName, containerId = "popupContainer") {
+  try {
+    const container = document.getElementById(containerId);
+
+    const res = await fetch(fileName);
+
+    if (!res.ok) {
+      throw new Error("File not found: " + fileName);
+    }
+
+    const html = await res.text();
+
+    container.innerHTML += html;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function INIT_POPUPS() {
+  const files = ["oldDevelopment.html", "hostelCheckoutRequestPopup.html"];
+
+  for (const file of files) {
+    await LOAD_HTML_FILE("Pages/" + file);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async function () {
+  await INIT_POPUPS();
+});
+
 function formatDuration(startTimestamp, endTimestamp) {
   // Calculate the difference in milliseconds
   const durationMs = endTimestamp - startTimestamp;
@@ -1504,4 +1545,899 @@ function SHOW_BUTTON_BY_ADMIN_ROLE(buttonId, roleKey, roleObj) {
   } else {
     button.style.display = "none";
   }
+}
+
+function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
+  containerId,
+  title,
+  data,
+  callback,
+  controls = {},
+  keyFilters = {},
+}) {
+  const {
+    showSelectAll = false,
+    showFilters = false,
+    showCategoryView = true,
+    selectionLimit = null,
+  } = controls;
+
+  const showCategoryToggle = true;
+
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const dropdown = document.createElement("div");
+  dropdown.classList.add("dynamic-dropdown");
+
+  const dropdownBtn = document.createElement("div");
+  dropdownBtn.classList.add("dynamic-dropdown-btn");
+  dropdownBtn.innerText = title;
+
+  const dropdownContent = document.createElement("div");
+  dropdownContent.classList.add("dynamic-dropdown-content");
+
+  dropdownContent.style.display = "block"; // default open
+
+  dropdownBtn.onclick = () => {
+    dropdownContent.style.display =
+      dropdownContent.style.display === "block" ? "none" : "block";
+  };
+
+  // =============================
+  // SEARCH
+  // =============================
+  const searchWrapper = document.createElement("div");
+  searchWrapper.classList.add("dropdown-search-wrapper");
+
+  const searchBox = document.createElement("input");
+  searchBox.classList.add("dropdown-search-box");
+  searchBox.placeholder = "Search...";
+
+  const clearBtn = document.createElement("span");
+  clearBtn.innerHTML = "✖";
+  clearBtn.classList.add("dropdown-clear-search-btn");
+
+  searchWrapper.appendChild(searchBox);
+  searchWrapper.appendChild(clearBtn);
+  dropdownContent.appendChild(searchWrapper);
+
+  // =============================
+  // CONTROL BAR
+  // =============================
+  function setActiveFilter(activeBtn) {
+    [btnAll, btnSelected, btnPending].forEach((btn) => {
+      if (btn) btn.classList.remove("active-filter");
+    });
+    if (activeBtn) activeBtn.classList.add("active-filter");
+  }
+
+  const controlBar = document.createElement("div");
+  controlBar.classList.add("dropdown-controlBar");
+  controlBar.style.display = !showSelectAll && !showFilters ? "none" : "flex";
+  controlBar.style.gap = "8px";
+  let categoryWiseCheckbox;
+
+  let selectAllCheckbox;
+
+  if (showSelectAll) {
+    const label = document.createElement("label");
+    label.htmlFor = "dynamicDropdownSelectAll_" + containerId; // unique id
+
+    selectAllCheckbox = document.createElement("input");
+    selectAllCheckbox.type = "checkbox";
+    selectAllCheckbox.id = "dynamicDropdownSelectAll_" + containerId; // bind only this label
+
+    label.appendChild(selectAllCheckbox);
+    label.appendChild(document.createTextNode("Select All"));
+
+    controlBar.appendChild(label);
+  }
+
+  if (showCategoryToggle) {
+    const switchLabel = document.createElement("label");
+    switchLabel.classList.add("dynamic-dropdown-switch-label-inline");
+    switchLabel.htmlFor = "dynamicDropdownCategory_" + containerId; // unique id
+
+    categoryWiseCheckbox = document.createElement("input");
+    categoryWiseCheckbox.type = "checkbox";
+    categoryWiseCheckbox.checked = showCategoryView;
+    categoryWiseCheckbox.id = "dynamicDropdownCategory_" + containerId; // bind only this
+    categoryWiseCheckbox.classList.add("dynamic-dropdown-switch-input");
+
+    const slider = document.createElement("span");
+    slider.classList.add("dynamic-dropdown-switch-slider");
+
+    const text = document.createElement("span");
+    text.classList.add("dynamic-dropdown-switch-text");
+    text.innerText = "Category Wise";
+
+    switchLabel.appendChild(categoryWiseCheckbox);
+    switchLabel.appendChild(slider);
+    switchLabel.appendChild(text);
+
+    controlBar.appendChild(switchLabel);
+  }
+
+  let btnAll, btnSelected, btnPending;
+
+  if (showFilters) {
+    btnAll = document.createElement("button");
+    btnAll.innerText = "All";
+
+    btnSelected = document.createElement("button");
+    btnSelected.innerText = "Selected";
+
+    btnPending = document.createElement("button");
+    btnPending.innerText = "Pending";
+
+    controlBar.appendChild(btnAll);
+    controlBar.appendChild(btnSelected);
+    controlBar.appendChild(btnPending);
+  }
+
+  // =============================
+  // EXPAND / COLLAPSE ALL BUTTON
+  // =============================
+  let expandCollapseBtn = document.createElement("button");
+  expandCollapseBtn.innerHTML = "Collapse All ⯈";
+  expandCollapseBtn.classList.add("expand-collapse-btn");
+
+  let isAllExpanded = true;
+
+  expandCollapseBtn.onclick = () => {
+    const allItems = dropdownContent.querySelectorAll(
+      ".dropdown-category-items",
+    );
+    const allIcons = dropdownContent.querySelectorAll(
+      ".dropdown-category-icon",
+    );
+
+    isAllExpanded = !isAllExpanded;
+
+    allItems.forEach((div) => {
+      div.style.display = isAllExpanded ? "block" : "none";
+    });
+
+    allIcons.forEach((icon) => {
+      icon.style.transform = isAllExpanded ? "rotate(180deg)" : "rotate(0deg)";
+    });
+
+    expandCollapseBtn.innerHTML = isAllExpanded
+      ? "Collapse All ⯈"
+      : "Expand All ⯆";
+  };
+
+  controlBar.appendChild(expandCollapseBtn);
+  dropdownContent.appendChild(controlBar);
+
+  // =============================
+  // 🔥 KEY FILTER UI (SAFE ADD)
+  // =============================
+  function applyKeyFilters() {
+    searchBox.dispatchEvent(new Event("keyup")); // 🔥 reuse search logic
+  }
+
+  const activeKeyFilters = {};
+
+  const keyFilterWrapper = document.createElement("div");
+  keyFilterWrapper.classList.add("dropdown-keyfilters");
+
+  function formatLabel(key) {
+    return key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+  }
+
+  if (Object.keys(keyFilters || {}).length) {
+    Object.keys(keyFilters).forEach((key) => {
+      const row = document.createElement("div");
+      row.classList.add("keyfilter-row");
+
+      const title = document.createElement("div");
+      title.classList.add("keyfilter-title-inline");
+      title.innerText = formatLabel(key);
+
+      const options = document.createElement("div");
+      options.classList.add("keyfilter-options-inline");
+
+      activeKeyFilters[key] = new Set();
+
+      keyFilters[key].forEach((val) => {
+        const label = document.createElement("label");
+        label.classList.add("keyfilter-chip");
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = val;
+
+        cb.onchange = () => {
+          if (cb.checked) activeKeyFilters[key].add(val);
+          else activeKeyFilters[key].delete(val);
+
+          applyKeyFilters(); // 🔥 ONLY THIS
+        };
+
+        const span = document.createElement("span");
+        span.innerText = val;
+
+        label.append(cb, span);
+        options.appendChild(label);
+      });
+
+      row.append(title, options);
+      keyFilterWrapper.appendChild(row);
+    });
+
+    dropdownContent.appendChild(keyFilterWrapper);
+  }
+
+  const categories = Object.keys(data || {});
+
+  // =============================
+  // CATEGORY LOOP (🔥 UPDATED)
+  // =============================
+  categories.forEach((category) => {
+    const catDiv = document.createElement("div");
+
+    const catHeader = document.createElement("div");
+    catHeader.classList.add("dropdown-category-header");
+
+    const text = document.createElement("span");
+    text.classList.add("dropdown-category-text");
+
+    const totalCount = data[category].length;
+    text.innerText = `${category} (0 / ${totalCount})`;
+
+    const icon = document.createElement("span");
+    icon.classList.add("dropdown-category-icon");
+    icon.innerHTML = "▾";
+
+    catHeader.appendChild(text);
+    catHeader.appendChild(icon);
+
+    const catItems = document.createElement("div");
+    catItems.classList.add("dropdown-category-items");
+    catItems.style.display = "block";
+    icon.style.transform = "rotate(180deg)";
+
+    catHeader.onclick = () => {
+      const isOpen = catItems.style.display === "block";
+      catItems.style.display = isOpen ? "none" : "block";
+      icon.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+    };
+
+    data[category].forEach((item) => {
+      let tooltipText = "";
+      let label = document.createElement("label");
+      label.classList.add("dropdown-item");
+
+      let checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+
+      //  IMPORTANT PART
+      const isObject = typeof item === "object";
+
+      const displayText = isObject ? item.value : item; // UI
+      const storedValue = isObject ? JSON.stringify(item) : item; // full object store
+
+      checkbox.value = storedValue;
+
+      // ==============================
+      //  FUNCTIONALITY START
+      // ==============================
+
+      let isDisabled = false;
+
+      if (isObject) {
+        const enableTime = item?.enableTime || "";
+        const disabledProp = item?.disabled;
+
+        // CASE 1: enableTime exists → priority
+        if (enableTime) {
+          try {
+            const now = new Date();
+            let enableDate = new Date();
+
+            // CASE 1: 24-hour format (13:00, 09:15)
+            if (/^\d{1,2}:\d{2}$/.test(enableTime.trim())) {
+              let [hours, minutes] = enableTime.split(":").map(Number);
+              enableDate.setHours(hours, minutes, 0, 0);
+            }
+
+            //  CASE 2: 12-hour format (01:00 PM)
+            else if (/^\d{1,2}:\d{2}\s?(AM|PM)$/i.test(enableTime.trim())) {
+              const [time, modifier] = enableTime.toUpperCase().split(" ");
+              let [hours, minutes] = time.split(":").map(Number);
+
+              if (modifier === "PM" && hours !== 12) hours += 12;
+              if (modifier === "AM" && hours === 12) hours = 0;
+
+              enableDate.setHours(hours, minutes, 0, 0);
+            } else {
+              isDisabled = false;
+              return;
+            }
+
+            isDisabled = now < enableDate;
+            if (isDisabled) {
+              tooltipText = `Enable Time : ${enableTime}`;
+            }
+          } catch (e) {
+            isDisabled = false;
+          }
+        }
+
+        //  CASE 2: fallback to disabled prop
+        else if (typeof disabledProp === "boolean") {
+          isDisabled = disabledProp;
+        }
+
+        //  CASE 3: default
+        else {
+          isDisabled = false;
+        }
+      }
+
+      // apply
+      checkbox.disabled = isDisabled;
+      if (isDisabled) {
+        label.classList.add("disabled");
+        label.title = tooltipText;
+
+        //  Click par bhi show (better UX)
+        label.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          showTooltip(label, tooltipText);
+        });
+      }
+      // ==============================
+      //  FUNCTIONALITY END
+      // ==============================
+
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(` ${displayText}`));
+
+      catItems.appendChild(label);
+    });
+
+    catDiv.appendChild(catHeader);
+    catDiv.appendChild(catItems);
+    dropdownContent.appendChild(catDiv);
+  });
+
+  // =============================
+  // COMMON
+  // =============================
+  function showTooltip(element, text) {
+    // remove old
+    const old = document.querySelector(".dropdown-custom-tooltip");
+    if (old) old.remove();
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "dropdown-custom-tooltip";
+    tooltip.innerText = text;
+
+    document.body.appendChild(tooltip);
+
+    const rect = element.getBoundingClientRect();
+
+    tooltip.style.top = rect.top - 35 + "px";
+    tooltip.style.left = rect.left + "px";
+
+    setTimeout(() => {
+      tooltip.remove();
+    }, 2000);
+  }
+
+  function getAllCheckboxes() {
+    return dropdownContent.querySelectorAll(
+      ".dropdown-item input[type='checkbox']",
+    );
+  }
+
+  function updateCategoryVisibility(mode) {
+    const categoryBlocks = dropdownContent.querySelectorAll(
+      ".dropdown-category-header",
+    );
+
+    categoryBlocks.forEach((header) => {
+      const catDiv = header.parentElement;
+      const itemsDiv = catDiv.querySelector(".dropdown-category-items");
+
+      const checkboxes = itemsDiv.querySelectorAll("input[type='checkbox']");
+
+      let hasSelected = false;
+      let hasPending = false;
+
+      checkboxes.forEach((cb) => {
+        if (cb.checked) hasSelected = true;
+        else hasPending = true;
+      });
+
+      if (mode === "ALL") catDiv.style.display = "block";
+      else if (mode === "SELECTED")
+        catDiv.style.display = hasSelected ? "block" : "none";
+      else if (mode === "PENDING")
+        catDiv.style.display = hasPending ? "block" : "none";
+    });
+  }
+
+  function updateSelection() {
+    const allCheckboxes = getAllCheckboxes();
+
+    // ==================================================
+    // GENERIC DYNAMIC LIMIT SUPPORT (Backward Safe)
+    // ==================================================
+    if (selectionLimit !== null) {
+      let limit =
+        typeof selectionLimit === "function"
+          ? selectionLimit()
+          : selectionLimit;
+
+      limit = Number(limit);
+
+      if (limit > 0) {
+        const checkedBoxes = Array.from(allCheckboxes).filter(
+          (cb) => cb.checked,
+        );
+
+        // If selected > limit → keep first N checked
+        if (checkedBoxes.length > limit) {
+          checkedBoxes.forEach((cb, index) => {
+            cb.checked = index < limit;
+          });
+        }
+      }
+    }
+
+    // ==================================================
+    // OLD LOGIC START (UNCHANGED BEHAVIOR)
+    // ==================================================
+    let selected = [];
+
+    allCheckboxes.forEach((cb) => {
+      if (cb.checked) {
+        try {
+          selected.push(JSON.parse(cb.value)); // object return
+        } catch (e) {
+          selected.push(cb.value); // fallback
+        }
+      }
+    });
+
+    const total = allCheckboxes.length;
+
+    dropdownBtn.innerText = selected.length
+      ? `${selected.length} / ${total} Selected`
+      : title;
+
+    const headers = dropdownContent.querySelectorAll(".dropdown-category-text");
+
+    headers.forEach((header, index) => {
+      const itemsDiv = header.parentElement.parentElement.querySelector(
+        ".dropdown-category-items",
+      );
+
+      const checkboxes = itemsDiv.querySelectorAll("input[type='checkbox']");
+
+      const total = checkboxes.length;
+
+      let selectedCount = 0;
+
+      checkboxes.forEach((cb) => {
+        if (cb.checked) selectedCount++;
+      });
+
+      const catName = categories[index];
+
+      header.innerText = `${catName} (${selectedCount} / ${total})`;
+    });
+
+    callback(selected);
+  }
+
+  dropdownContent.addEventListener("change", (e) => {
+    const isKeyFilter = e.target.closest(".dropdown-keyfilters");
+    const isItem = e.target.closest(".dropdown-item");
+
+    // OLD LOGIC SAFE
+    if (isKeyFilter) return; // ignore key filter clicks
+    if (!isItem) return; // only actual dropdown items
+
+    const changedCheckbox = e.target;
+
+    // ==================================================
+    // NEW GENERIC LIMIT FEATURE (Backward Compatible)
+    // ==================================================
+    if (
+      changedCheckbox.type === "checkbox" &&
+      changedCheckbox.checked &&
+      typeof selectionLimit !== "undefined" &&
+      selectionLimit !== null
+    ) {
+      let limit =
+        typeof selectionLimit === "function"
+          ? selectionLimit()
+          : selectionLimit;
+
+      limit = Number(limit);
+
+      if (limit > 0) {
+        const checkedCount = dropdownContent.querySelectorAll(
+          ".dropdown-item input[type='checkbox']:checked",
+        ).length;
+
+        if (checkedCount > limit) {
+          changedCheckbox.checked = false;
+
+          SHOW_ERROR_POPUP(`Maximum ${limit} selections allowed.`);
+          return;
+        }
+      }
+    }
+
+    // OLD MAIN LOGIC
+    updateSelection();
+  });
+
+  // SELECT ALL
+  if (selectAllCheckbox) {
+    selectAllCheckbox.onclick = function () {
+      getAllCheckboxes().forEach((cb) => {
+        if (!cb.disabled) {
+          cb.checked = this.checked;
+        }
+      });
+
+      updateSelection();
+      updateCategoryVisibility("ALL");
+    };
+  }
+
+  // FILTERS
+  if (btnAll) {
+    btnAll.onclick = () => {
+      dropdownContent
+        .querySelectorAll(".dropdown-item")
+        .forEach((l) => (l.style.display = "flex"));
+
+      updateCategoryVisibility("ALL");
+      setActiveFilter(btnAll);
+    };
+  }
+
+  if (btnSelected) {
+    btnSelected.onclick = () => {
+      dropdownContent.querySelectorAll(".dropdown-item").forEach((l) => {
+        const cb = l.querySelector("input");
+        l.style.display = cb.checked ? "flex" : "none";
+      });
+
+      updateCategoryVisibility("SELECTED");
+      setActiveFilter(btnSelected);
+    };
+  }
+
+  if (btnPending) {
+    btnPending.onclick = () => {
+      dropdownContent.querySelectorAll(".dropdown-item").forEach((l) => {
+        const cb = l.querySelector("input");
+        l.style.display = !cb.checked ? "flex" : "none";
+      });
+
+      updateCategoryVisibility("PENDING");
+      setActiveFilter(btnPending);
+    };
+  }
+
+  // SEARCH
+  searchBox.onkeyup = function () {
+    const val = this.value.toLowerCase().trim();
+
+    const categoryBlocks = dropdownContent.querySelectorAll(
+      ".dropdown-category-header",
+    );
+
+    categoryBlocks.forEach((header) => {
+      const catDiv = header.parentElement;
+      const itemsDiv = catDiv.querySelector(".dropdown-category-items");
+
+      const labels = itemsDiv.querySelectorAll(".dropdown-item");
+
+      let visibleCount = 0;
+      let selectedCount = 0;
+
+      labels.forEach((label) => {
+        const cb = label.querySelector("input");
+
+        let text = label.innerText.toLowerCase();
+
+        // 🔥 include object fields (OLD logic same)
+        let obj;
+        try {
+          obj = JSON.parse(cb.value);
+          if (typeof obj === "object") {
+            text += " " + Object.values(obj).join(" ").toLowerCase();
+          }
+        } catch (e) {}
+
+        const searchMatch = text.includes(val);
+
+        // 🔥 KEY FILTER MATCH
+        let filterMatch = true;
+        const hasKeyFilters = Object.keys(keyFilters || {}).length > 0;
+
+        if (hasKeyFilters) {
+          for (let key in activeKeyFilters) {
+            const set = activeKeyFilters[key];
+
+            if (set.size && (!obj || !set.has(obj[key]))) {
+              filterMatch = false;
+              break;
+            }
+          }
+        }
+
+        const finalMatch = searchMatch && filterMatch;
+
+        label.style.display = finalMatch ? "flex" : "none";
+
+        if (finalMatch) {
+          visibleCount++;
+          if (cb.checked) selectedCount++;
+        }
+      });
+
+      // 🔥 hide empty category
+      catDiv.style.display = visibleCount > 0 ? "block" : "none";
+
+      // 🔥 update count
+      const catName = header
+        .querySelector(".dropdown-category-text")
+        .innerText.split("(")[0]
+        .trim();
+
+      header.querySelector(".dropdown-category-text").innerText =
+        `${catName} (${selectedCount} / ${visibleCount})`;
+    });
+  };
+
+  clearBtn.onclick = () => {
+    searchBox.value = "";
+
+    // 🔥 reset all items
+    dropdownContent.querySelectorAll(".dropdown-item").forEach((l) => {
+      l.style.display = "flex";
+    });
+
+    // reset categories + correct count
+    const categoryBlocks = dropdownContent.querySelectorAll(
+      ".dropdown-category-header",
+    );
+
+    categoryBlocks.forEach((header, index) => {
+      const catDiv = header.parentElement;
+      catDiv.style.display = "block";
+
+      const itemsDiv = catDiv.querySelector(".dropdown-category-items");
+      const checkboxes = itemsDiv.querySelectorAll("input[type='checkbox']");
+
+      const total = checkboxes.length;
+
+      let selectedCount = 0;
+      checkboxes.forEach((cb) => {
+        if (cb.checked) selectedCount++;
+      });
+
+      const catName = categories[index];
+      header.querySelector(".dropdown-category-text").innerText =
+        `${catName} (${selectedCount} / ${total})`;
+    });
+  };
+
+  dropdown.appendChild(dropdownBtn);
+  dropdown.appendChild(dropdownContent);
+
+  if (categoryWiseCheckbox) {
+    categoryWiseCheckbox.onchange = function () {
+      const allHeaders = dropdownContent.querySelectorAll(
+        ".dropdown-category-header",
+      );
+
+      const allCategoryBoxes = dropdownContent.querySelectorAll(
+        ".dropdown-category-items",
+      );
+
+      if (this.checked) {
+        allHeaders.forEach((h) => (h.style.display = "flex"));
+
+        allCategoryBoxes.forEach((box) => {
+          box.style.display = "block";
+          box.style.paddingLeft = "";
+        });
+      } else {
+        allHeaders.forEach((h) => (h.style.display = "none"));
+
+        allCategoryBoxes.forEach((box) => {
+          box.style.display = "block";
+          box.style.paddingLeft = "0px";
+        });
+      }
+    };
+
+    // 🔥 apply initial state
+    categoryWiseCheckbox.dispatchEvent(new Event("change"));
+  }
+
+  dropdown.forceUpdateSelection = updateSelection;
+  container.appendChild(dropdown);
+}
+
+function UPDATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER(
+  containerId,
+  data,
+  callback,
+  controls = {},
+  keyFilters = {},
+) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
+    containerId,
+    title: "Select",
+    data,
+    callback,
+    controls,
+    keyFilters,
+  });
+}
+
+function GET_KEY_FILTERS(data, keys) {
+  const result = {};
+  const tempSets = {};
+
+  // Initialize sets
+  keys.forEach((key) => {
+    tempSets[key] = new Set();
+  });
+
+  // Single loop over data
+  Object.values(data).forEach((student) => {
+    keys.forEach((key) => {
+      const value = (student[key] || "").toString().trim();
+
+      if (value !== "") {
+        tempSets[key].add(value);
+      }
+    });
+  });
+
+  // Convert to array
+  keys.forEach((key) => {
+    result[key] = Array.from(tempSets[key]);
+  });
+
+  return result;
+}
+
+function SET_DIV_TITLE(popupId, titleText) {
+  const el = document.querySelector(`#${popupId} .popup-title-box`);
+  if (el) {
+    el.innerText = titleText;
+  } else {
+    console.warn("popup-title-box not found inside:", popupId);
+  }
+}
+
+function PARSE_IST_DATE(dateString) {
+  if (!dateString) return null;
+
+  dateString = dateString.toString().trim();
+
+  const monthNames = {
+    jan: 0,
+    january: 0,
+    feb: 1,
+    february: 1,
+    mar: 2,
+    march: 2,
+    apr: 3,
+    april: 3,
+    may: 4,
+    jun: 5,
+    june: 5,
+    jul: 6,
+    july: 6,
+    aug: 7,
+    august: 7,
+    sep: 8,
+    sept: 8,
+    september: 8,
+    oct: 9,
+    october: 9,
+    nov: 10,
+    november: 10,
+    dec: 11,
+    december: 11,
+  };
+
+  let parts;
+
+  // =============================
+  // 1. dd-MMM-yyyy / dd-MMMM-yyyy
+  // =============================
+  parts = dateString.match(/^(\d{1,2})-([A-Za-z]+)-(\d{4})/);
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = monthNames[parts[2].toLowerCase()];
+    const year = parseInt(parts[3], 10);
+
+    if (month === undefined) return null;
+    return new Date(year, month, day);
+  }
+
+  // =============================
+  // 2. dd MMM yyyy
+  // =============================
+  parts = dateString.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = monthNames[parts[2].toLowerCase()];
+    const year = parseInt(parts[3], 10);
+
+    if (month === undefined) return null;
+    return new Date(year, month, day);
+  }
+
+  // =============================
+  // 3. dd-MM-yyyy
+  // =============================
+  parts = dateString.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = parseInt(parts[2], 10) - 1;
+    const year = parseInt(parts[3], 10);
+
+    return new Date(year, month, day);
+  }
+
+  // =============================
+  // 4. M/D/YYYY
+  // =============================
+  parts = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (parts) {
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    const year = parseInt(parts[3], 10);
+
+    return new Date(year, month, day);
+  }
+
+  // =============================
+  // 5. YYYY/MM/DD
+  // =============================
+  parts = dateString.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if (parts) {
+    const year = parseInt(parts[1], 10);
+    const month = parseInt(parts[2], 10) - 1;
+    const day = parseInt(parts[3], 10);
+
+    return new Date(year, month, day);
+  }
+
+  // =============================
+  // 6. ISO (safe only)
+  // =============================
+  if (dateString.includes("T")) {
+    const d = new Date(dateString);
+    if (!isNaN(d)) {
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+  }
+
+  return null; //  unsupported format
 }

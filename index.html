@@ -9,6 +9,8 @@
 
     <link rel="stylesheet" href="StylesCommon.css" />
     <link rel="stylesheet" href="SytlesSpecificShowTaskList.css" />
+    <link rel="stylesheet" href="StyleDynamicDropdown.css" />
+    <link rel="stylesheet" href="StyleRefreshButton.css" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
@@ -157,144 +159,19 @@
 
             <button
               class="green"
-              style="display: none"
-              onclick="taskList()"
-            ></button>
+              id="hostelCheckoutRequestBtn"
+              onclick="hcrStudentEntryBtnClick()"
+            >
+              Hostelers Chcekout System
+            </button>
+
             <button class="green" onclick="contacts()">Contacts</button>
             <button class="red" onclick="onLogoutClick()">Logout</button>
           </div>
         </div>
       </div>
 
-      <div class="popup" id="serviceOwnerCheckList">
-        <div class="popup-content scrollable-content">
-          <h3 id="userNameDiv">Loading...</h3>
-          <div class="accordion" id="otherLinkAccordion"></div>
-          <div class="button-row">
-            <button
-              class="green"
-              id="submitUserResponse"
-              onclick="submitUserResponse()"
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="popup" id="reviewerCheckList">
-        <div class="popup-content scrollable-content">
-          <h3 id="userNameReviewerDiv">Loading...</h3>
-          <div class="accordion" id="otherLinkAccordionReviewer"></div>
-          <div class="button-row">
-            <button
-              class="green"
-              id="submitUserResponseReviewer"
-              onclick="submitUserResponseReviewer()"
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="popup" id="feedbackCheckList">
-        <div class="popup-content scrollable-content">
-          <h3 id="userNameFeedbackDiv">Loading...</h3>
-          <div class="accordion" id="otherLinkAccordionFeedback"></div>
-          <div class="button-row">
-            <button
-              class="green"
-              id="submitUserResponseFeedback"
-              onclick="submitUserResponseFeedback()"
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="popup" id="taskTrackerList">
-        <div class="popup-content scrollable-content">
-          <h3 id="taskTrackerHeading">Task Tracker</h3>
-          Testing task tracker functionality.
-        </div>
-      </div>
-
-      <div class="popup" id="serviceList">
-        <div class="popup-content scrollable-content">
-          Testing Service list functionality.
-        </div>
-      </div>
-
-      <div
-        id="contactsForm"
-        class="popup-content scrollable-content leftSideNav-itemContainer"
-      >
-        <div class="contact-list">
-          <h3>Emergency Contacts</h3>
-          <ul>
-            <li>Plumber Rahishu - <a href="tel:7351578195">7351578195</a></li>
-            <li>
-              Electrician Manoj -
-              <a href="tel:9910262827">9910262827</a>
-            </li>
-            <li>Cleaner Pradip - <a href="tel:8800534793">8800534793</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div
-        class="popup-content scrollable-content leftSideNav-itemContainer"
-        id="noResponseComments"
-      >
-        <h3>कृपया 'No' वाले उत्तरों के लिए टिप्पणी भरें:</h3>
-        <div id="commentFields"></div>
-        <div class="button-row">
-          <button class="red" onclick="goToServiceCheckList()">Back</button>
-          <button class="green" onclick="submitServiceCheckList()">
-            Submit
-          </button>
-        </div>
-      </div>
-
-      <div
-        class="popup-content scrollable-content leftSideNav-itemContainer"
-        id="noResponseCommentsReviewer"
-      >
-        <h3>कृपया 'No' वाले उत्तरों के लिए टिप्पणी भरें:</h3>
-        <div id="commentFieldsReviewer"></div>
-        <div class="button-row">
-          <button class="red" onclick="goToServiceCheckListReview()">
-            Back
-          </button>
-          <button class="green" onclick="submitServiceCheckListReview()">
-            Submit
-          </button>
-        </div>
-      </div>
-
-      <div class="popup" id="noResponseCommentsFeedback">
-        <div class="popup-content scrollable-content">
-          <h3>कृपया 'No' वाले उत्तरों के लिए टिप्पणी भरें:</h3>
-          <div id="commentFieldsFeedback"></div>
-          <div class="button-row">
-            <button class="red" onclick="goToServiceCheckListFeedback()">
-              Back
-            </button>
-            <button class="green" onclick="submitServiceCheckListFeedback()">
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="popup" id="showTaskListPopup">
-        <div class="popup-content scrollable-content">
-          <h2>All Task List</h2>
-          <div id="showTaskListDiv"></div>
-        </div>
-      </div>
+      <div id="popupContainer"></div>
     </div>
 
     <script src="ScriptCommon.js"></script>
@@ -303,6 +180,7 @@
     <script src="ScriptReviewer.js"></script>
     <script src="ScriptFeedback.js"></script>
     <script src="ScriptShowTask.js"></script>
+    <script src="ScriptHostelCheckoutRequest.js"></script>
 
     <script src="Script.js"></script>
   </body>
