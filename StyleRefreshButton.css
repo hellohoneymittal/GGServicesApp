@@ -1,0 +1,60 @@
+.refresh-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.refresh-btn-new {
+  display: flex;
+  width: 24% !important;
+  border: none;
+  cursor: pointer;
+  border-radius: 30px;
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  flex-direction: row-reverse !important;
+  transition: transform 0.2s ease;
+}
+
+/* LEFT ICON PART */
+.refresh-icon {
+  background: #e76f2c; /* theme orange */
+  color: white;
+  padding: 10px 14px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* RIGHT TEXT PART */
+.refresh-text {
+  background: #5a5a63; /* soft dark */
+  color: #fff;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* CLICK EFFECT */
+.refresh-btn-new:active {
+  transform: scale(0.95);
+}
+
+.popup-title-box {
+  text-align: center;
+  margin-bottom: 5px;
+  font-size: 18px;
+  color: #f3e5f5;
+  font-weight: bold;
+  background: #6a0dad;
+  border-radius: 8px;
+  border: 1px solid #9c6ade;
+  box-shadow: none;
+  max-width: 100%;
+  padding: 10px 8px;
+  cursor: default;
+  user-select: none;
+}
