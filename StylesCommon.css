@@ -198,7 +198,6 @@ body {
 }
 
 .popup-content label {
-  display: block;
   text-align: left;
   margin-top: 10px;
   font-weight: bold;
@@ -1807,4 +1806,45 @@ input[type="radio"] {
   pointer-events: none;
   opacity: 0.45;
   filter: grayscale(100%);
+}
+.declaration-box {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  align-items: start;
+  gap: 10px;
+
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+
+  border: 1px solid #d9b37a;
+  border-radius: 10px;
+  background: #fff8ef;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* Checkbox fixed left */
+.declaration-check-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.declaration-check-area input[type="checkbox"] {
+  transform: scale(1.35);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Text full proper width */
+.declaration-text-area {
+  width: 100%;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 600;
+  text-align: left;
+  word-break: break-word;
 }
