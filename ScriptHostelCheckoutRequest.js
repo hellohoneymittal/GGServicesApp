@@ -272,6 +272,10 @@ async function hcrEntrySubClick() {
 
     const studentListStrEntry = selectedHCREntry.join("\n");
 
+    const isAccepted = document.getElementById(
+      "hcrDeclarationCheckbox",
+    )?.checked;
+
     if (!purpose) {
       SHOW_ERROR_POPUP("Please select purpose.");
       return;
@@ -294,6 +298,11 @@ async function hcrEntrySubClick() {
 
     if (!reason) {
       SHOW_ERROR_POPUP("Please enter reason.");
+      return;
+    }
+
+    if (!isAccepted) {
+      SHOW_ERROR_POPUP("Please accept responsibility declaration first.");
       return;
     }
 
@@ -328,13 +337,6 @@ async function hcrEntrySubClick() {
   }
 }
 
-function resetHCREntryForm() {
-  hcrRemoveSelectedDataFromPendingEntry();
-  selectedHCREntry = [];
-  hcrPopulateMultiSelectDropdownEntry();
-  document.getElementById("specialEntryReason").value = "";
-}
-
 function hcrRemoveSelectedDataFromPendingEntry() {
   // selected ka unique set banao (fast lookup)
   const selectedSet = new Set(
@@ -355,6 +357,14 @@ function hcrRemoveSelectedDataFromPendingEntry() {
 }
 
 function hcrBackBtnClick() {
+  SHOW_CONFIRMATION_POPUP(
+    "Are you sure?<br><br>Do you want to go back to the Menu?",
+    resetAndShowMenu,
+  );
+}
+
+function resetAndShowMenu() {
+  resetHCREntryForm();
   SHOW_SPECIFIC_DIV("menuPopup");
 }
 
@@ -363,12 +373,13 @@ async function hostelCheckoutRequestRefClick() {
 }
 
 async function hcrResetBtnClick() {
-  const ok = confirm(
-    "Are you sure?\n\nAll selected students, purpose, duration and reason will be reset.",
+  SHOW_CONFIRMATION_POPUP(
+    "Are you sure?<br><br>All selected students, purpose, duration and reason will be reset.",
+    resetHCREntryForm,
   );
+}
 
-  if (!ok) return;
-
+function resetHCREntryForm() {
   // ===============================
   // Reset Purpose
   // ===============================
@@ -397,12 +408,31 @@ async function hcrResetBtnClick() {
   // Reset Selected Students
   // ===============================
   selectedHCREntry = [];
-
+  document.getElementById("hcrDeclarationCheckbox").checked = false;
   // rebuild dropdown fresh
   hcrPopulateMultiSelectDropdownEntry();
 
-  // disable student selection box
   UPDATE_HCR_STUDENT_DROPDOWN_STATE();
+}
 
-  SHOW_SUCCESS_POPUP("Reset successfully.");
+function UPDATE_HCR_STUDENT_DROPDOWN_STATE() {
+  const purpose = document.getElementById("purposeDropdown")?.value || "";
+
+  const durationType =
+    document.getElementById("durationTypeDropdown")?.value || "";
+
+  const duration = document.getElementById("specialEntryDuration")?.value || "";
+
+  const box = document.getElementById(
+    "hostelCheckoutRequest-dynamic-dropdown-container",
+  );
+
+  if (!box) return;
+
+  // Enable only when all required selected
+  if (purpose && durationType && duration) {
+    box.classList.remove("disabled");
+  } else {
+    box.classList.add("disabled");
+  }
 }

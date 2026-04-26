@@ -400,7 +400,7 @@ function SHOW_CONFIRMATION_POPUP(
   const noButton = document.getElementById("confirmationNoButton");
 
   // Set the message dynamically
-  popupMessage.textContent = message;
+  popupMessage.innerHTML = message;
 
   // Assign event handlers dynamically
   yesButton.onclick = () => {
