@@ -58,7 +58,7 @@ function HANDLE_DURATION_TYPE_CHANGE() {
   if (type === "day") {
     DURATION_OPTIONS.day.forEach((day) => {
       const opt = document.createElement("option");
-      opt.value = day * 1440; // convert to minutes
+      opt.value = day;
       opt.textContent = day === 1 ? "1 Day" : `${day} Days`;
 
       dropdown.appendChild(opt);
