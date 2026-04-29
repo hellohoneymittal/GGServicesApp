@@ -1,9 +1,9 @@
 function renderMenus(roleData) {
-  SHOW_BUTTON_BY_ADMIN_ROLE(
-    "serviceOwnerBtn",
-    "Hostel Sewakarta Role",
-    roleData,
-  );
+  // SHOW_BUTTON_BY_ADMIN_ROLE(
+  //   "serviceOwnerBtn",
+  //   "Hostel Sewakarta Role",
+  //   roleData,
+  // );
 
   SHOW_SPECIFIC_DIV("menuPopup");
   setUserNameOnFrontScreen(selectedUser?.name);
