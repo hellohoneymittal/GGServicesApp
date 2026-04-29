@@ -328,6 +328,7 @@ async function hcrEntrySubClick() {
     const res = await CALL_API("SAVE_HOSTEL_CHECKOUT_REQUEST", payload);
 
     if (res?.status) {
+      hcrRemoveSelectedDataFromPendingEntry();
       resetHCREntryForm();
       SHOW_SUCCESS_POPUP("Saved successfully ✅");
     } else {
@@ -413,7 +414,6 @@ function resetHCREntryForm() {
   document.getElementById("hcrDeclarationCheckbox").checked = false;
   // rebuild dropdown fresh
   hcrPopulateMultiSelectDropdownEntry();
-
   UPDATE_HCR_STUDENT_DROPDOWN_STATE();
 }
 
