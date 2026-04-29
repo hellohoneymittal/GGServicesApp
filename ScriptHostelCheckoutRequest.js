@@ -21,11 +21,12 @@ const CLASS_NAME_HINDI_MAP = {
 };
 
 const PURPOSE_LIMITS = {
-  "Temple le jaane ke liye": 10,
-  "Padhai Karane ke liye": 2,
-  "Park le jaane ke liye": 15,
-  "Swimming le jaane ke liye": 20,
-  "Ghar le jaane ke liye": 2,
+  "Temple Visit": 15,
+  "Krishna Kutir Mangal Aarti": 12,
+  Sankirtan: 2,
+  "Park Games": 20,
+  Swimming: 2,
+  "Special Occasion (Festival at Temple, Marriage, etc.)": 2,
 };
 
 const DURATION_OPTIONS = {
