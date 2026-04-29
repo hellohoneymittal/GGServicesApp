@@ -41,6 +41,7 @@ const DURATION_OPTIONS = {
     { value: 90, label: "90 Min" },
     { value: 120, label: "120 Min" },
     { value: 180, label: "180 Min" },
+    { value: 300, label: "300 Min" },
   ],
 };
 
@@ -137,7 +138,7 @@ function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData, roleData) {
   Object.keys(allStudentsData).forEach((key) => {
     const obj = allStudentsData[key];
     debugger;
-    if (obj.hostler === "Y") {
+    if (obj.hostler === "Y" && obj.currentResident === "Y") {
       presentMap.set(key, key);
     }
   });
