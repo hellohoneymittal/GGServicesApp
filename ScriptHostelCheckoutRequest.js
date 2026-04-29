@@ -21,11 +21,12 @@ const CLASS_NAME_HINDI_MAP = {
 };
 
 const PURPOSE_LIMITS = {
-  "Temple le jaane ke liye": 10,
-  "Padhai Karane ke liye": 2,
-  "Park le jaane ke liye": 15,
-  "Swimming le jaane ke liye": 20,
-  "Ghar le jaane ke liye": 2,
+  "Temple Visit": 15,
+  "Krishna Kutir Mangal Aarti": 12,
+  Sankirtan: 2,
+  "Park Games": 20,
+  Swimming: 2,
+  "Special Occasion (Festival at Temple, Marriage, etc.)": 2,
 };
 
 const DURATION_OPTIONS = {
@@ -40,6 +41,7 @@ const DURATION_OPTIONS = {
     { value: 90, label: "90 Min" },
     { value: 120, label: "120 Min" },
     { value: 180, label: "180 Min" },
+    { value: 300, label: "300 Min" },
   ],
 };
 
@@ -136,7 +138,7 @@ function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData, roleData) {
   Object.keys(allStudentsData).forEach((key) => {
     const obj = allStudentsData[key];
     debugger;
-    if (obj.hostler === "Y") {
+    if (obj.hostler === "Y" && obj.currentResident === "Y") {
       presentMap.set(key, key);
     }
   });
