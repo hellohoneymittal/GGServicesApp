@@ -311,14 +311,14 @@ async function hcrEntrySubClick() {
     // ===============================
     // PAYLOAD
     // ===============================
-    const payload = {
+    const payload = selectedHCREntry.map((studentName) => ({
       purpose,
       durationType,
       duration,
-      studentList: studentListStrEntry,
+      studentName,
       teacherName,
       reason,
-    };
+    }));
 
     console.log("Sending:", payload);
 
