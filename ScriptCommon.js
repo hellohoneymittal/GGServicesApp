@@ -1560,6 +1560,7 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
     showFilters = false,
     showCategoryView = true,
     selectionLimit = null,
+    showDataBasedOnFilters = false,
   } = controls;
 
   const showCategoryToggle = true;
@@ -2098,20 +2099,23 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
   // FILTERS
   if (btnAll) {
     btnAll.onclick = () => {
-      dropdownContent
-        .querySelectorAll(".dropdown-item")
-        .forEach((l) => (l.style.display = "flex"));
+      // Reuse existing search + key filter logic
+      searchBox.dispatchEvent(new Event("keyup"));
 
-      updateCategoryVisibility("ALL");
       setActiveFilter(btnAll);
     };
   }
 
   if (btnSelected) {
     btnSelected.onclick = () => {
+      // First apply search/filter logic
+      searchBox.dispatchEvent(new Event("keyup"));
+
       dropdownContent.querySelectorAll(".dropdown-item").forEach((l) => {
-        const cb = l.querySelector("input");
-        l.style.display = cb.checked ? "flex" : "none";
+        if (l.style.display !== "none") {
+          const cb = l.querySelector("input");
+          l.style.display = cb.checked ? "flex" : "none";
+        }
       });
 
       updateCategoryVisibility("SELECTED");
@@ -2121,9 +2125,14 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
 
   if (btnPending) {
     btnPending.onclick = () => {
+      // First apply search/filter logic
+      searchBox.dispatchEvent(new Event("keyup"));
+
       dropdownContent.querySelectorAll(".dropdown-item").forEach((l) => {
-        const cb = l.querySelector("input");
-        l.style.display = !cb.checked ? "flex" : "none";
+        if (l.style.display !== "none") {
+          const cb = l.querySelector("input");
+          l.style.display = !cb.checked ? "flex" : "none";
+        }
       });
 
       updateCategoryVisibility("PENDING");
@@ -2168,15 +2177,25 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
         let filterMatch = true;
         const hasKeyFilters = Object.keys(keyFilters || {}).length > 0;
 
+        let anyFilterSelected = false; // ✅ NEW
+
         if (hasKeyFilters) {
           for (let key in activeKeyFilters) {
             const set = activeKeyFilters[key];
+
+            if (set.size) {
+              anyFilterSelected = true;
+            }
 
             if (set.size && (!obj || !set.has(obj[key]))) {
               filterMatch = false;
               break;
             }
           }
+        }
+
+        if (showDataBasedOnFilters && !anyFilterSelected) {
+          filterMatch = false;
         }
 
         const finalMatch = searchMatch && filterMatch;
@@ -2206,34 +2225,17 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
   clearBtn.onclick = () => {
     searchBox.value = "";
 
-    // 🔥 reset all items
-    dropdownContent.querySelectorAll(".dropdown-item").forEach((l) => {
-      l.style.display = "flex";
-    });
+    // Reapply current filter/search rules
+    searchBox.dispatchEvent(new Event("keyup"));
 
-    // reset categories + correct count
-    const categoryBlocks = dropdownContent.querySelectorAll(
-      ".dropdown-category-header",
-    );
-
-    categoryBlocks.forEach((header, index) => {
-      const catDiv = header.parentElement;
-      catDiv.style.display = "block";
-
-      const itemsDiv = catDiv.querySelector(".dropdown-category-items");
-      const checkboxes = itemsDiv.querySelectorAll("input[type='checkbox']");
-
-      const total = checkboxes.length;
-
-      let selectedCount = 0;
-      checkboxes.forEach((cb) => {
-        if (cb.checked) selectedCount++;
-      });
-
-      const catName = categories[index];
-      header.querySelector(".dropdown-category-text").innerText =
-        `${catName} (${selectedCount} / ${total})`;
-    });
+    // keep active top button mode if selected
+    if (btnSelected && btnSelected.classList.contains("active-filter")) {
+      btnSelected.click();
+    } else if (btnPending && btnPending.classList.contains("active-filter")) {
+      btnPending.click();
+    } else if (btnAll && btnAll.classList.contains("active-filter")) {
+      btnAll.click();
+    }
   };
 
   dropdown.appendChild(dropdownBtn);
@@ -2272,6 +2274,9 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
 
   dropdown.forceUpdateSelection = updateSelection;
   container.appendChild(dropdown);
+  if (showDataBasedOnFilters) {
+    searchBox.dispatchEvent(new Event("keyup"));
+  }
 }
 
 function UPDATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER(
