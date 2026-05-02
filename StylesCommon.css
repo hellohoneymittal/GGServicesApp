@@ -695,7 +695,7 @@ body {
 
 .collection-table-container {
   overflow: auto;
-  max-width: 400px;
+  max-width: 100%;
   margin-bottom: 1rem;
 }
 
@@ -723,11 +723,11 @@ td {
 
 /* Alternating row colors */
 tbody tr:nth-child(odd) {
-  background-color: #e8f5e9;
+  background-color: #fff5ea;
 }
 
 tbody tr:nth-child(even) {
-  background-color: #f1f8e9;
+  background-color: #f8d4ad;
 }
 
 @media (max-width: 600px) {
@@ -818,7 +818,7 @@ tbody tr:nth-child(even) {
 }
 
 .popup-content img {
-  max-width: 100%; /* Ensure the image resizes within the container */
+  max-width: 50%; /* Ensure the image resizes within the container */
   height: auto; /* Maintain aspect ratio */
   border-radius: 10px; /* Optional: Add rounded corners to the image */
 }
@@ -837,7 +837,8 @@ tbody tr:nth-child(even) {
 }
 
 .infoPopup-content {
-  background: linear-gradient(135deg, #ffffff, #e6e6e6);
+  /* background: linear-gradient(135deg, #ffffff, #e6e6e6); */
+  background-color: #f8d4ad;
   padding: 20px;
   border-radius: 16px;
   width: 90%;
@@ -913,6 +914,7 @@ tbody tr:nth-child(even) {
   color: #555;
   font-weight: bold;
   margin-bottom: 20px;
+  white-space: pre-line;
 }
 
 .highlight {
@@ -1847,4 +1849,63 @@ input[type="radio"] {
   font-weight: 600;
   text-align: left;
   word-break: break-word;
+}
+
+/* Container for all questions */
+.question-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.radio-content-without-flex {
+  margin-bottom: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.radio-content-box-head-GP {
+  display: grid;
+  grid-template-columns: 50% 25% 25%;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #52609a;
+  color: #fff5ea;
+  border: 1px solid #52609a;
+  font-size: 14px;
+}
+
+.radio-content-inbox {
+  margin-bottom: 0px;
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 2px;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.radio-content-inbox input[type="radio"] {
+  margin: 0;
+  padding: 0;
+}
+
+.radio-content-box-GP {
+  display: grid;
+  grid-template-columns: 50% 25% 25%;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: #fff5ea;
+  border: 1px solid #52609a;
+  font-size: 13px;
+}
+
+.radio-content-box-GP label {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 }

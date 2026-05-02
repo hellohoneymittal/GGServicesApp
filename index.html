@@ -30,9 +30,7 @@
           <div class="infoPopup-icon success"></div>
           <h2 class="infoPopup-heading success">Success!</h2>
           <div id="successMessage" class="infoPopup-message"></div>
-          <button class="green" onclick="CLOSE_INFO_POPUP('successPopup')">
-            OKAY
-          </button>
+          <button class="green" id="successOkButton">OKAY</button>
         </div>
       </div>
       <div class="infoPopup" id="errorPopup">
@@ -172,7 +170,16 @@
               id="hostelCheckoutRequestBtn"
               onclick="hcrStudentEntryBtnClick()"
             >
-              Hostellers Checkout Request System
+              Hostelers Checkout Request System
+            </button>
+
+            <button
+              class="green"
+              id="gatePassApprovalBtn"
+              onclick="openGatePassWindow()"
+              style="display: none"
+            >
+              Student Gate Pass Approval
             </button>
 
             <button class="green" onclick="contacts()" style="display: none">
@@ -193,7 +200,7 @@
     <script src="ScriptFeedback.js"></script>
     <script src="ScriptShowTask.js"></script>
     <script src="ScriptHostelCheckoutRequest.js"></script>
-
+    <script src="ScriptGatePass.js"></script>
     <script src="Script.js"></script>
   </body>
 </html>

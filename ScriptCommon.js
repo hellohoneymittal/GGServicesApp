@@ -1,9 +1,9 @@
 function renderMenus(roleData) {
-  // SHOW_BUTTON_BY_ADMIN_ROLE(
-  //   "serviceOwnerBtn",
-  //   "Hostel Sewakarta Role",
-  //   roleData,
-  // );
+  SHOW_BUTTON_BY_ADMIN_ROLE(
+    "gatePassApprovalBtn",
+    "Hostel Incharge Role",
+    roleData,
+  );
 
   SHOW_SPECIFIC_DIV("menuPopup");
   setUserNameOnFrontScreen(selectedUser?.name);
@@ -28,7 +28,11 @@ async function LOAD_HTML_FILE(fileName, containerId = "popupContainer") {
 }
 
 async function INIT_POPUPS() {
-  const files = ["oldDevelopment.html", "hostelCheckoutRequestPopup.html"];
+  const files = [
+    "oldDevelopment.html",
+    "hostelCheckoutRequestPopup.html",
+    "gatePassApproval.html",
+  ];
 
   for (const file of files) {
     await LOAD_HTML_FILE("Pages/" + file);
@@ -369,9 +373,20 @@ function fillDynamicTableRows(data, headerId, bodyId) {
   });
 }
 
-function SHOW_SUCCESS_POPUP(message) {
-  document.getElementById("successMessage").innerHTML = message;
-  document.getElementById("successPopup").style.display = "flex";
+function SHOW_SUCCESS_POPUP(message, onClose) {
+  const popup = document.getElementById("successPopup");
+  const msg = document.getElementById("successMessage");
+  const closeBtn = document.getElementById("successOkButton");
+
+  msg.innerHTML = message;
+  popup.style.display = "flex";
+
+  closeBtn.onclick = () => {
+    popup.style.display = "none";
+
+    // optional callback
+    onClose?.();
+  };
 }
 
 // Function to show the error popup

@@ -1,0 +1,59 @@
+<!doctype html>
+<div class="popup" id="verificationGridPopup">
+  <div class="popup-content scrollable-content" id="verificationGridSubPopup">
+    <img
+      src="https://drive.google.com/thumbnail?id=15-SQ9oW0U2eX2vsWmyxvmhwu9Q1QgOZm&sz=w500"
+      alt="School Logo"
+    />
+    <div
+      class="user-info-block"
+      id="verifyDetailsHeading_div"
+      style="display: none"
+    >
+      <p id="verifyDetailsHeading_lbl"></p>
+    </div>
+    <div class="heading" id="gridHeading">Verify Details</div>
+    <div class="button-row">
+      <button class="red" id="verificationBackButton">Back</button>
+      <button class="green" id="verificationSubmitBtn">Submit</button>
+    </div>
+  </div>
+</div>
+<div class="popup" style="display: none" id="gatePassContainer">
+  <div class="popup-content scrollable-content">
+    <img
+      src="https://drive.google.com/thumbnail?id=15-SQ9oW0U2eX2vsWmyxvmhwu9Q1QgOZm&sz=w500"
+      alt="School Logo"
+    />
+    <h2>Gate Pass Management</h2>
+    <div class="user-info-block" id="gatePassHeading_div" style="display: none">
+      <p id="gatePassHeading_lbl"></p>
+    </div>
+
+    <div id="gatePassWindow"></div>
+
+    <div class="button-row">
+      <button
+        class="purple"
+        onclick="
+          resetGPForm();
+          SHOW_SPECIFIC_DIV('menuPopup');
+        "
+      >
+        Back
+      </button>
+      <button
+        class="red"
+        onclick="
+          SHOW_CONFIRMATION_POPUP('Do you want to reset form?', resetGPForm);
+          document.getElementById('gatePassNextBtn').disabled = true;
+        "
+      >
+        Reset
+      </button>
+      <button class="green" id="gatePassNextBtn" onclick="" disabled>
+        Next
+      </button>
+    </div>
+  </div>
+</div>
