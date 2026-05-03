@@ -1776,7 +1776,7 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
         };
 
         const span = document.createElement("span");
-        span.innerText = val;
+        span.innerText = val; // UI shows Parent (13)
 
         label.append(cb, span);
         options.appendChild(label);
@@ -1788,6 +1788,8 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
 
     dropdownContent.appendChild(keyFilterWrapper);
   }
+
+  ADD_COPY_LIST_BUTTON(dropdownContent, keyFilterWrapper);
 
   const categories = Object.keys(data || {});
 
@@ -2054,6 +2056,41 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
     });
 
     callback(selected);
+  }
+
+  function ADD_COPY_LIST_BUTTON(dropdownContent, keyFilterWrapper) {
+    const copyBtn = document.createElement("div");
+    copyBtn.innerHTML = "📋";
+    copyBtn.classList.add("dynamic-dropdown-copy-btn");
+
+    copyBtn.onclick = async function () {
+      const labels = dropdownContent.querySelectorAll(".dropdown-item");
+
+      let arr = [];
+
+      labels.forEach((label) => {
+        if (label.style.display !== "none") {
+          const txt = label.innerText.trim();
+          if (txt) arr.push(txt);
+        }
+      });
+
+      if (!arr.length) {
+        await navigator.clipboard.writeText("");
+        showTooltip(copyBtn, "No Recrod");
+        return;
+      }
+
+      await navigator.clipboard.writeText(arr.join("\n"));
+
+      showTooltip(
+        copyBtn,
+        `${arr.length} ${arr.length === 1 ? "Record" : "Records"} Copied`,
+      );
+    };
+
+    keyFilterWrapper.style.position = "relative";
+    keyFilterWrapper.appendChild(copyBtn);
   }
 
   dropdownContent.addEventListener("change", (e) => {
