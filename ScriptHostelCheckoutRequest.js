@@ -137,8 +137,12 @@ function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData, roleData) {
   // =============================
   Object.keys(allStudentsData).forEach((key) => {
     const obj = allStudentsData[key];
-    debugger;
-    if (obj.hostler === "Y" && obj.currentResident === "Y") {
+
+    if (
+      obj.hostler === "Y" &&
+      obj.currentResident === "Y" &&
+      obj.gender === "Male"
+    ) {
       presentMap.set(key, key);
     }
   });
