@@ -1,6 +1,8 @@
 let hcrPendingStdList = {};
 let selectedHCREntry = [];
 let keyFiltersDataHCREntry = {};
+let groupData = [];
+
 const CLASS_NAME_HINDI_MAP = {
   "Pre Nursery": "प्री नर्सरी",
   Nursery: "नर्सरी",
@@ -118,7 +120,7 @@ CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
   keyFilters: {},
 });
 
-function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData, roleData) {
+function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData) {
   const today = new Date();
   const presentMap = new Map();
   const exitSet = new Set();
@@ -137,8 +139,12 @@ function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData, roleData) {
   // =============================
   Object.keys(allStudentsData).forEach((key) => {
     const obj = allStudentsData[key];
-    debugger;
-    if (obj.hostler === "Y" && obj.currentResident === "Y") {
+
+    if (
+      obj.hostler === "Y" &&
+      obj.currentResident === "Y" &&
+      obj.gender === "Male"
+    ) {
       presentMap.set(key, key);
     }
   });
@@ -254,6 +260,110 @@ async function hcrStudentEntryBtnClick() {
     "hostelCheckoutRequestPopup",
     "Hostelers Checkout Request System",
   );
+
+  groupData = populateAllSewakartaList(
+    output?.data?.hcRequestSheetData,
+    output?.data?.allStudentsData,
+    selectedUser?.role,
+  );
+  renderAccordionGroups();
+}
+
+function populateAllSewakartaList(hcRequestSheetData, allStudentsData) {
+  const today = new Date();
+  const finalMap = {};
+
+  function isSameDay(d1, d2) {
+    return (
+      d1 &&
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  }
+
+  function getDateValue(dateStr) {
+    if (!dateStr) return null;
+    return PARSE_IST_DATE(dateStr);
+  }
+
+  // =====================================
+  // TODAY REQUESTED DATA ONLY
+  // row[0] = Date
+  // row[1] = Request Raised DateTime
+  // row[2] = Student Names
+  // row[3] = Requested By
+  // =====================================
+  for (let i = 1; i < hcRequestSheetData.length; i++) {
+    const row = hcRequestSheetData[i];
+
+    const rowDate = PARSE_IST_DATE(row[0]);
+    if (!isSameDay(rowDate, today)) continue;
+
+    const requestTime = getDateValue(row[1]);
+    const groupName = row[3]?.toString().trim() || "Unknown Group";
+    const studentList = row[2]?.split("\n") || [];
+
+    // group create
+    if (!finalMap[groupName]) {
+      finalMap[groupName] = {
+        group: groupName,
+        members: [],
+      };
+    }
+
+    studentList.forEach((studentName) => {
+      const cleanName = studentName.trim();
+      if (!cleanName) return;
+
+      const studentObj = allStudentsData[cleanName];
+
+      let currentStatus = "Requested";
+
+      if (studentObj) {
+        const resident = studentObj.currentResident;
+        const movementTime = getDateValue(studentObj.hostelCheckincheckoutTime);
+
+        // =====================================
+        // STATUS RULES
+        // =====================================
+
+        if (resident === "N") {
+          currentStatus = "Checked Out";
+        } else if (resident === "Y") {
+          console.log("name ", studentObj?.studentName);
+          console.log("movementTime", movementTime);
+          console.log("requestTime", requestTime);
+          if (
+            movementTime &&
+            requestTime &&
+            movementTime.getTime() > requestTime.getTime()
+          ) {
+            currentStatus = "Checked In";
+          } else {
+            currentStatus = "Requested";
+          }
+        }
+      }
+
+      finalMap[groupName].members.push({
+        name:
+          studentObj?.studentHindiName || studentObj?.studentName || cleanName,
+
+        englishName: cleanName,
+        currentStatus: currentStatus,
+      });
+    });
+  }
+
+  // =====================================
+  // FINAL ARRAY OUTPUT
+  // =====================================
+  const output = Object.values(finalMap);
+
+  console.log("Final Requested Group Data:", output);
+
+  return output;
 }
 
 async function hcrEntrySubClick() {
@@ -437,4 +547,87 @@ function UPDATE_HCR_STUDENT_DROPDOWN_STATE() {
   } else {
     box.classList.add("disabled");
   }
+}
+
+/* ===============================
+   STATIC DATA
+================================= */
+// const groupData = [
+//   {
+//     group: "Group 1",
+//     members: ["Rahul", "Mohan", "Suresh", "Karan", "Vikas"],
+//   },
+//   {
+//     group: "Group 2",
+//     members: ["Ravi", "Ajay", "Deepak", "Manoj", "Nitin"],
+//   },
+//   {
+//     group: "Group 3",
+//     members: ["Amit", "Lokesh", "Tarun", "Gopal", "Sachin"],
+//   },
+// ];
+
+function renderAccordionGroups() {
+  const box = document.getElementById("groupAccordionSection");
+  box.style.display = "block";
+
+  box.innerHTML = `
+    <div class="group-main-heading">
+      Already Requested Data
+    </div>
+
+    ${groupData
+      .map(
+        (grp, index) => `
+        <div class="group-card">
+
+          <div class="group-header" onclick="toggleGroup(this)">
+            <div>
+              ${grp.group}
+              <span class="group-count">(${grp.members.length})</span>
+            </div>
+
+            <span class="group-icon">⌄</span>
+          </div>
+
+          <div class="group-body">
+            <ul class="group-list">
+
+              ${grp.members
+                .map((member) => {
+                  let statusClass = "";
+
+                  if (member.currentStatus === "Requested") {
+                    statusClass = "status-requested";
+                  } else if (member.currentStatus === "Checked In") {
+                    statusClass = "status-checkedin";
+                  } else if (member.currentStatus === "Checked Out") {
+                    statusClass = "status-checkedout";
+                  }
+
+                  return `
+                    <li>
+                      ${member.englishName}
+
+                      <span class="group-item-status-badge ${statusClass}">
+                        ${member.currentStatus}
+                      </span>
+                    </li>
+                  `;
+                })
+                .join("")}
+
+            </ul>
+          </div>
+
+        </div>
+      `,
+      )
+      .join("")}
+  `;
+}
+
+function toggleGroup(el) {
+  const card = el.parentElement;
+  card.classList.toggle("active");
 }
