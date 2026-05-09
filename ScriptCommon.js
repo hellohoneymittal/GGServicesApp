@@ -1763,17 +1763,20 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
 
         const cb = document.createElement("input");
         cb.type = "checkbox";
-        cb.value = val;
+
+        const actualValue = val.replace(/\s*\(\d+\)\s*$/, "").trim();
+
+        cb.value = actualValue;
 
         cb.onchange = () => {
-          if (cb.checked) activeKeyFilters[key].add(val);
-          else activeKeyFilters[key].delete(val);
+          if (cb.checked) activeKeyFilters[key].add(actualValue);
+          else activeKeyFilters[key].delete(actualValue);
 
-          applyKeyFilters(); // 🔥 ONLY THIS
+          applyKeyFilters();
         };
 
         const span = document.createElement("span");
-        span.innerText = val;
+        span.innerText = val; // UI shows Parent (13)
 
         label.append(cb, span);
         options.appendChild(label);
@@ -1786,10 +1789,12 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
     dropdownContent.appendChild(keyFilterWrapper);
   }
 
+  ADD_COPY_LIST_BUTTON(dropdownContent, keyFilterWrapper);
+
   const categories = Object.keys(data || {});
 
   // =============================
-  // CATEGORY LOOP (🔥 UPDATED)
+  // CATEGORY LOOP (UPDATED)
   // =============================
   categories.forEach((category) => {
     const catDiv = document.createElement("div");
@@ -2053,6 +2058,41 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
     callback(selected);
   }
 
+  function ADD_COPY_LIST_BUTTON(dropdownContent, keyFilterWrapper) {
+    const copyBtn = document.createElement("div");
+    copyBtn.innerHTML = "📋";
+    copyBtn.classList.add("dynamic-dropdown-copy-btn");
+
+    copyBtn.onclick = async function () {
+      const labels = dropdownContent.querySelectorAll(".dropdown-item");
+
+      let arr = [];
+
+      labels.forEach((label) => {
+        if (label.style.display !== "none") {
+          const txt = label.innerText.trim();
+          if (txt) arr.push(txt);
+        }
+      });
+
+      if (!arr.length) {
+        await navigator.clipboard.writeText("");
+        showTooltip(copyBtn, "No Recrod");
+        return;
+      }
+
+      await navigator.clipboard.writeText(arr.join("\n"));
+
+      showTooltip(
+        copyBtn,
+        `${arr.length} ${arr.length === 1 ? "Record" : "Records"} Copied`,
+      );
+    };
+
+    keyFilterWrapper.style.position = "relative";
+    keyFilterWrapper.appendChild(copyBtn);
+  }
+
   dropdownContent.addEventListener("change", (e) => {
     const isKeyFilter = e.target.closest(".dropdown-keyfilters");
     const isItem = e.target.closest(".dropdown-item");
@@ -2199,7 +2239,7 @@ function CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
             const set = activeKeyFilters[key];
 
             if (set.size) {
-              anyFilterSelected = true;
+              anyFilterSelected = true; // ✅ NEW
             }
 
             if (set.size && (!obj || !set.has(obj[key]))) {
@@ -2388,6 +2428,25 @@ function PARSE_IST_DATE(dateString) {
   let parts;
 
   // =============================
+  // 0. dd-MMM-yyyy HH:mm / dd-MMMM-yyyy HH:mm
+  // =============================
+  parts = dateString.match(
+    /^(\d{1,2})-([A-Za-z]+)-(\d{4})\s+(\d{1,2}):(\d{2})$/,
+  );
+
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = monthNames[parts[2].toLowerCase()];
+    const year = parseInt(parts[3], 10);
+    const hour = parseInt(parts[4], 10);
+    const minute = parseInt(parts[5], 10);
+
+    if (month === undefined) return null;
+
+    return new Date(year, month, day, hour, minute, 0);
+  }
+
+  // =============================
   // 1. dd-MMM-yyyy / dd-MMMM-yyyy
   // =============================
   parts = dateString.match(/^(\d{1,2})-([A-Za-z]+)-(\d{4})/);
@@ -2423,6 +2482,23 @@ function PARSE_IST_DATE(dateString) {
     const year = parseInt(parts[3], 10);
 
     return new Date(year, month, day);
+  }
+
+  // =============================
+  // 3. dd/MM/yyyy HH:MM
+  // =============================
+  parts = dateString.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/,
+  );
+
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = parseInt(parts[2], 10) - 1;
+    const year = parseInt(parts[3], 10);
+    const hour = parseInt(parts[4], 10);
+    const minute = parseInt(parts[5], 10);
+
+    return new Date(year, month, day, hour, minute, 0);
   }
 
   // =============================

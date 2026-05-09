@@ -84,10 +84,12 @@
 
 .dynamic-dropdown-content {
   display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
+  position: relative;
+  top: auto;
+  left: auto;
+
   width: 100%;
+  margin-top: 12px;
 
   background: #fffaf3;
   border-radius: 12px;
@@ -98,6 +100,10 @@
 
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   padding: 8px;
+}
+
+.dynamic-dropdown-container {
+  margin-bottom: 15px;
 }
 
 /* ITEMS */
@@ -147,7 +153,9 @@
 }
 
 .dynamic-dropdown-container {
-  min-height: 350px;
+  min-height: auto;
+  height: auto;
+  transition: all 0.25s ease;
 }
 
 /* CATEGORY HEADER - MODERN LOOK */
@@ -368,20 +376,40 @@
   font-weight: 500;
 }
 
+.dynamic-dropdown-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
 @media (min-width: 768px) {
   .dynamic-dropdown-container {
-    min-height: 475px;
+    min-height: auto;
+    height: auto;
   }
+
   .dynamic-dropdown-content {
-    min-height: 400px;
+    max-height: 400px;
+    min-height: auto;
   }
 }
 @media (max-width: 768px) {
   .dynamic-dropdown-container {
-    min-height: 475px;
+    min-height: auto;
+    height: auto;
   }
+
   .dynamic-dropdown {
-    width: 100%; /* full width */
+    width: 100%;
     max-width: 100%;
   }
 
@@ -393,13 +421,14 @@
 
   .dynamic-dropdown-content {
     width: 97%;
-    max-height: 60vh; /* better mobile scroll */
     border-radius: 10px;
+    max-height: 43vh;
+    min-height: auto;
   }
 
   /* 🔥 Control bar fix */
   .dynamic-dropdown-content > div {
-    flex-wrap: wrap; /* buttons wrap */
+    flex-wrap: wrap;
     gap: 6px;
   }
 
@@ -421,42 +450,36 @@
     font-size: 12px;
     padding: 10px;
   }
+
   .dropdown-controlBar {
     display: flex !important;
-    flex-wrap: nowrap; /* ❌ wrap band */
+    flex-wrap: nowrap;
     align-items: center;
     gap: 6px;
-
-    overflow-x: auto; /* 👉 horizontal scroll */
+    overflow-x: auto;
     padding-bottom: 4px;
-
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
   }
 
   .dropdown-controlBar::-webkit-scrollbar {
-    display: none; /* Chrome */
+    display: none;
   }
 
-  /* ✅ Select All */
   .dropdown-controlBar label {
     display: flex;
     align-items: center;
     gap: 4px;
-
     font-size: 11px;
     white-space: nowrap;
     flex-shrink: 0;
   }
 
-  /* ✅ Buttons */
   .dropdown-controlBar button {
-    width: auto !important; /* ❌ remove full width */
+    width: auto !important;
     display: inline-block;
-
     font-size: 10px;
     padding: 10px 14px;
     border-radius: 12px;
-
     white-space: nowrap;
     flex-shrink: 0;
   }
