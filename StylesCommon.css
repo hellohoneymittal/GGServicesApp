@@ -175,6 +175,8 @@ body {
 }
 
 .popup-content input[type="text"],
+.popup-content textarea,
+.popup-content select,
 .password-popup-content input[type="text"] {
   width: 100%;
   padding: 10px;
@@ -184,6 +186,8 @@ body {
   border-radius: 8px;
   font-size: 1rem;
   box-sizing: border-box;
+  background-color: #fff5ea;
+  font-family: Arial, sans-serif;
 }
 
 .popup-content input[type="date"] {
