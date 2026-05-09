@@ -4,10 +4,9 @@ let currentSlotDetails = "";
 let attendanceTimestampMap = new Map();
 let currentMinutes = now.getHours() * 60 + now.getMinutes();
 let time_slots = {
-  "19:40 - 23:00": {
+  "19:35 - 23:00": {
     name: "Sleeping Slot",
     instructions: [
-      "The form is to be opened before 8:05 PM for Sewakarta attendance!",
       "Students have brushed their teeth",
       "Tomorrow's clothes arranged",
       "Missing essentials(brush, toothpaste, etc) taken by the student",
@@ -16,7 +15,7 @@ let time_slots = {
       "Air cooler tank filled",
     ],
   },
-  "23:00 - 04:35": {
+  "23:00 - 04:50": {
     name: "Wake up Slot",
     instructions: [
       "Students out of bed",
@@ -26,7 +25,7 @@ let time_slots = {
       "Went to bath",
     ],
   },
-  "04:35 - 05:40": {
+  "04:50 - 06:00": {
     name: "Morning Program Slot",
     instructions: [
       "Wearing proper school uniform(Kurta and Plain dhoti/lower)",
@@ -132,10 +131,10 @@ async function openAttendanceWindow(view = 0) {
       return;
     }
 
-    if (Object.keys(outputData.data).length == 0) {
-      SHOW_INFO_POPUP("No students in hostel today!");
-      return;
-    }
+    // if (Object.keys(outputData.data).length == 0) {
+    //   SHOW_INFO_POPUP("No students in hostel today!");
+    //   return;
+    // }
 
     studentList = outputData.data;
     populateStudentMultiSelectDropdown(
