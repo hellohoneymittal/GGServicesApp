@@ -32,6 +32,7 @@ async function INIT_POPUPS() {
     "oldDevelopment.html",
     "hostelCheckoutRequestPopup.html",
     "gatePassApproval.html",
+    "attendance.html",
   ];
 
   for (const file of files) {
@@ -2536,4 +2537,67 @@ function PARSE_IST_DATE(dateString) {
   }
 
   return null; //  unsupported format
+}
+
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3;
+  const toRad = (x) => (x * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function checkLocation(inputLat, inputLong, allowedRadius) {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject("Geolocation not supported");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const distance = getDistance(latitude, longitude, inputLat, inputLong);
+        //SHOW_INFO_POPUP(`Current location: ${latitude}, ${longitude}, Distance: ${distance}`);
+        console.log(
+          `Current location: ${latitude}, ${longitude}, Distance: ${distance}`,
+        );
+
+        let formattedDistance;
+
+        if (distance >= 1000)
+          formattedDistance = (Number(distance) / 1000).toFixed(2) + " km";
+        else formattedDistance = Number(distance).toFixed(2) + " m";
+
+        formattedDistance += `%(${Number(latitude).toFixed(5)},${Number(longitude).toFixed(5)})`;
+
+        resolve(distance <= allowedRadius ? 1 : formattedDistance);
+      },
+      (error) => {
+        console.error("Geolocation error:", error.message);
+        reject(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  });
+}
+
+function convertToMinutes(time) {
+  const [hours, minutes] = time.split(":").map(Number);
+
+  return hours * 60 + minutes;
 }
