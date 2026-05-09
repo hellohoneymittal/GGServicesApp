@@ -1,12 +1,10 @@
 let studentList = [];
-const hostel_start_time = "19:30";
-const hostel_end_time = "05:45";
 let now = new Date();
 let currentSlotDetails = "";
 let attendanceTimestampMap = new Map();
 let currentMinutes = now.getHours() * 60 + now.getMinutes();
 let time_slots = {
-  "16:30 - 23:00": {
+  "19:40 - 23:00": {
     name: "Sleeping Slot",
     instructions: [
       "The form is to be opened before 8:05 PM for Sewakarta attendance!",
@@ -28,7 +26,7 @@ let time_slots = {
       "Went to bath",
     ],
   },
-  "04:35 - 05:45": {
+  "04:35 - 05:40": {
     name: "Morning Program Slot",
     instructions: [
       "Wearing proper school uniform(Kurta and Plain dhoti/lower)",
@@ -64,7 +62,7 @@ async function openAttendanceWindow(view = 0) {
   const schoolLat = 28.657501589771897; // your school latitude
   const schoolLng = 77.43753484576277; // your school longitude
   const allowedRadius = 150; // meters
-  let ignoreTeachers = ["Amani Nitai Prabhuji"];
+  let ignoreTeachers = [];
   let result = 0;
   currentSlotDetails = getCurrentTimeSlotInstructions();
   let formOpenTime = now.toLocaleTimeString([], {
