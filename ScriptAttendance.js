@@ -1,8 +1,6 @@
 let studentList = [];
-let now = new Date();
 let currentSlotDetails = "";
 let attendanceTimestampMap = new Map();
-let currentMinutes = now.getHours() * 60 + now.getMinutes();
 let time_slots = {
   "19:35 - 23:00": {
     name: "Sleeping Slot",
@@ -15,7 +13,7 @@ let time_slots = {
       "Air cooler tank filled",
     ],
   },
-  "23:00 - 04:50": {
+  "03:30 - 05:00": {
     name: "Wake up Slot",
     instructions: [
       "Students out of bed",
@@ -25,7 +23,7 @@ let time_slots = {
       "Went to bath",
     ],
   },
-  "04:50 - 06:00": {
+  "05:05 - 06:10": {
     name: "Morning Program Slot",
     instructions: [
       "Wearing proper school uniform(Kurta and Plain dhoti/lower)",
@@ -61,6 +59,7 @@ async function openAttendanceWindow(view = 0) {
   const schoolLat = 28.657501589771897; // your school latitude
   const schoolLng = 77.43753484576277; // your school longitude
   const allowedRadius = 150; // meters
+  let now = new Date();
   let ignoreTeachers = [];
   let result = 0;
   currentSlotDetails = getCurrentTimeSlotInstructions();
@@ -80,7 +79,9 @@ async function openAttendanceWindow(view = 0) {
 
   if (view == 0) {
     if (currentSlotDetails == null) {
-      SHOW_INFO_POPUP("⚠️ Cannot mark attendance outside of hostel hours!");
+      SHOW_INFO_POPUP(
+        "⚠️ Cannot mark attendance outside of defined slot hours!",
+      );
       return;
     }
 
@@ -180,6 +181,7 @@ async function openAttendanceWindow(view = 0) {
 
 function getCurrentTimeSlotInstructions() {
   // Current time in minutes
+  let now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   for (const [slot, details] of Object.entries(time_slots)) {
@@ -203,6 +205,7 @@ function getCurrentTimeSlotInstructions() {
     if (isInSlot) {
       return {
         slot,
+        end,
         ...details,
       };
     }
@@ -212,6 +215,18 @@ function getCurrentTimeSlotInstructions() {
 }
 
 async function markAttendance() {
+  let now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const endMinutes = convertToMinutes(currentSlotDetails.end);
+
+  if (currentMinutes > endMinutes) {
+    SHOW_ERROR_POPUP(
+      `❌ Action Disallowed ❌\n\n⚠️ Submission time EXCEEDS the slot end time!`,
+    );
+    SHOW_SPECIFIC_DIV("menuPopup");
+    return;
+  }
+
   const payload = Object.fromEntries(attendanceTimestampMap);
 
   console.log(payload);
