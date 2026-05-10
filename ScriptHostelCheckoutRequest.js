@@ -443,13 +443,15 @@ async function hcrStudentEntryBtnClick() {
   renderAccordionGroups();
 }
 
-function populateAllSewakartaList(hcRequestSheetData, allStudentsData) {
+function old_populateAllSewakartaList(hcRequestSheetData, allStudentsData) {
   const today = new Date();
+
   const finalMap = {};
 
   function isSameDay(d1, d2) {
     return (
       d1 &&
+      d2 &&
       d1.getFullYear() === d2.getFullYear() &&
       d1.getMonth() === d2.getMonth() &&
       d1.getDate() === d2.getDate()
@@ -458,36 +460,83 @@ function populateAllSewakartaList(hcRequestSheetData, allStudentsData) {
 
   function getDateValue(dateStr) {
     if (!dateStr) return null;
+
     return PARSE_IST_DATE(dateStr);
+  }
+
+  function formatTime(dateObj) {
+    if (!dateObj) return "";
+
+    const hh = String(dateObj.getHours()).padStart(2, "0");
+
+    const mm = String(dateObj.getMinutes()).padStart(2, "0");
+
+    return `${hh}:${mm}`;
   }
 
   // =====================================
   // TODAY REQUESTED DATA ONLY
-  // row[0] = Date
-  // row[1] = Request Raised DateTime
-  // row[2] = Student Names
-  // row[3] = Requested By
   // =====================================
   for (let i = 1; i < hcRequestSheetData.length; i++) {
     const row = hcRequestSheetData[i];
 
-    const rowDate = PARSE_IST_DATE(row[0]);
+    // row[0] = Date
+    // row[1] = Request Raised DateTime
+    // row[2] = Student Names
+    // row[3] = Requested By
+    // row[7] = Purpose
+
+    const rowDate = getDateValue(row[0]);
+
     if (!isSameDay(rowDate, today)) continue;
 
     const requestTime = getDateValue(row[1]);
-    const groupName = row[3]?.toString().trim() || "Unknown Group";
+
+    const requestTimeText = formatTime(requestTime);
+
+    const requestedBy = row[3]?.toString().trim() || "Unknown Group";
+
+    const purpose = row[7]?.toString().trim() || "";
+
     const studentList = row[2]?.split("\n") || [];
 
-    // group create
-    if (!finalMap[groupName]) {
-      finalMap[groupName] = {
-        group: groupName,
+    // =====================================
+    // UNIQUE GROUPING
+    // NAME + REQUEST TIME + PURPOSE
+    // =====================================
+    const groupKey = `${requestedBy}__${requestTimeText}__${purpose}`;
+
+    // =====================================
+    // HEADER
+    // Example:
+    // Balwan Hari Prabhuji (27) - Market
+    // =====================================
+    const groupDisplayName =
+      `${requestedBy} (${requestTimeText})` + (purpose ? ` - ${purpose}` : "");
+
+    // =====================================
+    // GROUP CREATE
+    // =====================================
+    if (!finalMap[groupKey]) {
+      finalMap[groupKey] = {
+        group: groupDisplayName,
+
+        requestedBy: requestedBy,
+
+        requestTime: requestTimeText,
+
+        purpose: purpose,
+
         members: [],
       };
     }
 
+    // =====================================
+    // MEMBERS
+    // =====================================
     studentList.forEach((studentName) => {
       const cleanName = studentName.trim();
+
       if (!cleanName) return;
 
       const studentObj = allStudentsData[cleanName];
@@ -496,6 +545,7 @@ function populateAllSewakartaList(hcRequestSheetData, allStudentsData) {
 
       if (studentObj) {
         const resident = studentObj.currentResident;
+
         const movementTime = getDateValue(studentObj.hostelCheckincheckoutTime);
 
         // =====================================
@@ -505,30 +555,252 @@ function populateAllSewakartaList(hcRequestSheetData, allStudentsData) {
         if (resident === "N") {
           currentStatus = "Checked Out";
         } else if (resident === "Y") {
-          console.log("name ", studentObj?.studentName);
-          console.log("movementTime", movementTime);
-          console.log("requestTime", requestTime);
-          if (
-            movementTime &&
-            requestTime &&
-            movementTime.getTime() > requestTime.getTime()
-          ) {
-            currentStatus = "Checked In";
-          } else {
-            currentStatus = "Requested";
+          if (movementTime && requestTime) {
+            const movementMs = movementTime.getTime();
+            const requestMs = requestTime.getTime();
+
+            // =====================================
+            // movement happened AFTER this request
+            // =====================================
+            if (movementMs > requestMs) {
+              currentStatus = "Checked In";
+            }
+
+            // =====================================
+            // request happened AFTER movement
+            // means fresh active request
+            // =====================================
+            else if (requestMs > movementMs) {
+              currentStatus = "Requested";
+            }
+
+            // fallback
+            else {
+              currentStatus = "Requested";
+            }
           }
         }
       }
 
-      finalMap[groupName].members.push({
+      finalMap[groupKey].members.push({
         name:
           studentObj?.studentHindiName || studentObj?.studentName || cleanName,
 
         englishName: cleanName,
+
         currentStatus: currentStatus,
       });
     });
   }
+
+  // =====================================
+  // FINAL ARRAY OUTPUT
+  // =====================================
+  const output = Object.values(finalMap);
+
+  console.log("Final Requested Group Data:", output);
+
+  return output;
+}
+
+function populateAllSewakartaList(hcRequestSheetData, allStudentsData) {
+  const today = new Date();
+
+  const finalMap = {};
+
+  function isSameDay(d1, d2) {
+    return (
+      d1 &&
+      d2 &&
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  }
+
+  function getDateValue(dateStr) {
+    if (!dateStr) return null;
+
+    return PARSE_IST_DATE(dateStr);
+  }
+
+  function formatTime(dateObj) {
+    if (!dateObj) return "";
+
+    const hh = String(dateObj.getHours()).padStart(2, "0");
+
+    const mm = String(dateObj.getMinutes()).padStart(2, "0");
+
+    return `${hh}:${mm}`;
+  }
+
+  // =====================================
+  // STORE ALL REQUESTS STUDENT-WISE
+  // =====================================
+  const studentRequestMap = {};
+
+  // =====================================
+  // FIRST PASS
+  // SAVE ALL REQUESTS
+  // =====================================
+  for (let i = 1; i < hcRequestSheetData.length; i++) {
+    const row = hcRequestSheetData[i];
+
+    const rowDate = getDateValue(row[0]);
+
+    if (!isSameDay(rowDate, today)) continue;
+
+    const requestTime = getDateValue(row[1]);
+
+    const requestTimeText = formatTime(requestTime);
+
+    const requestedBy = row[3]?.toString().trim() || "Unknown Group";
+
+    const purpose = row[7]?.toString().trim() || "";
+
+    const studentList = row[2]?.split("\n") || [];
+
+    // =====================================
+    // UNIQUE GROUPING
+    // =====================================
+    const groupKey = `${requestedBy}__${requestTimeText}__${purpose}`;
+
+    const groupDisplayName =
+      `${requestedBy} (${requestTimeText})` + (purpose ? ` - ${purpose}` : "");
+
+    // =====================================
+    // GROUP CREATE
+    // =====================================
+    if (!finalMap[groupKey]) {
+      finalMap[groupKey] = {
+        group: groupDisplayName,
+
+        requestedBy: requestedBy,
+
+        requestTime: requestTimeText,
+
+        purpose: purpose,
+
+        requestDate: requestTime,
+
+        members: [],
+      };
+    }
+
+    // =====================================
+    // MEMBERS
+    // =====================================
+    studentList.forEach((studentName) => {
+      const cleanName = studentName.trim();
+
+      if (!cleanName) return;
+
+      // =====================================
+      // SAVE STUDENT REQUEST HISTORY
+      // =====================================
+      if (!studentRequestMap[cleanName]) {
+        studentRequestMap[cleanName] = [];
+      }
+
+      studentRequestMap[cleanName].push({
+        requestTime: requestTime,
+        groupKey: groupKey,
+      });
+
+      finalMap[groupKey].members.push({
+        name: cleanName,
+        englishName: cleanName,
+        currentStatus: "Requested",
+        requestDate: requestTime,
+      });
+    });
+  }
+
+  // =====================================
+  // SORT ALL REQUESTS
+  // =====================================
+  Object.keys(studentRequestMap).forEach((student) => {
+    studentRequestMap[student].sort((a, b) => {
+      return a.requestTime?.getTime() - b.requestTime?.getTime();
+    });
+  });
+
+  // =====================================
+  // SECOND PASS
+  // APPLY STATUS
+  // =====================================
+  Object.keys(finalMap).forEach((groupKey) => {
+    const group = finalMap[groupKey];
+
+    group.members.forEach((member) => {
+      const cleanName = member.englishName;
+
+      const studentObj = allStudentsData[cleanName];
+
+      if (!studentObj) return;
+
+      const resident = studentObj.currentResident;
+
+      const movementTime = getDateValue(studentObj.hostelCheckincheckoutTime);
+
+      const requestTime = member.requestDate;
+
+      const allRequests = studentRequestMap[cleanName] || [];
+
+      let currentStatus = "Requested";
+
+      // =====================================
+      // FIND IF ANY NEWER REQUEST EXISTS
+      // =====================================
+      const newerRequestExists = allRequests.some(
+        (req) =>
+          req.requestTime &&
+          requestTime &&
+          req.requestTime.getTime() > requestTime.getTime(),
+      );
+
+      // =====================================
+      // CASE 1
+      // movement after THIS request
+      // =====================================
+      if (
+        movementTime &&
+        requestTime &&
+        movementTime.getTime() > requestTime.getTime()
+      ) {
+        // =====================================
+        // IF NEW REQUEST EXISTS
+        // old request closed
+        // =====================================
+        if (newerRequestExists) {
+          currentStatus = "Checked In";
+        }
+
+        // =====================================
+        // NO NEW REQUEST
+        // latest state matters
+        // =====================================
+        else {
+          currentStatus = resident === "Y" ? "Checked In" : "Checked Out";
+        }
+      }
+
+      // =====================================
+      // CASE 2
+      // request after movement
+      // =====================================
+      else {
+        currentStatus = resident === "Y" ? "Requested" : "Checked Out";
+      }
+
+      member.currentStatus = currentStatus;
+
+      member.name =
+        studentObj?.studentHindiName || studentObj?.studentName || cleanName;
+
+      delete member.requestDate;
+    });
+  });
 
   // =====================================
   // FINAL ARRAY OUTPUT
