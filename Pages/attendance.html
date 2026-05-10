@@ -1,0 +1,37 @@
+<!doctype html>
+<div class="popup" id="stdAttendanceContainer">
+  <div class="popup-content scrollable-content">
+    <img
+      src="https://drive.google.com/thumbnail?id=15-SQ9oW0U2eX2vsWmyxvmhwu9Q1QgOZm&sz=w500"
+      alt="School Logo"
+    />
+    <div class="user-info-block">
+      <p id="selectStudentsHeading_lbl"></p>
+    </div>
+    <h2 id="attendanceHeading">Hostel Attendance</h2>
+    <div class="instructions">
+      <h3>Important Points</h3>
+      <ul id="instructionsBox"></ul>
+    </div>
+
+    <div class="radio-container">
+      <div class="radio-heading-student">
+        <label id="student-list" class="required">Student List</label>
+      </div>
+      <div class="radio-content-without-flex" id="dynamic-student-list">
+        <!-- Students will be inserted here -->
+      </div>
+    </div>
+
+    <div id="markAttendanceDiv" class="button-row">
+      <button class="red" onclick="SHOW_SPECIFIC_DIV('menuPopup')">Back</button>
+      <button
+        class="green"
+        onclick="markAttendance()"
+        id="mark_attendance_button"
+      >
+        Mark Attendance
+      </button>
+    </div>
+  </div>
+</div>
