@@ -120,7 +120,7 @@ CREATE_MULTI_SELECT_DROPDOWN_WITH_CATEGORY_WITH_KEYFILTER({
   keyFilters: {},
 });
 
-function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData) {
+function old_HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData) {
   const today = new Date();
   const presentMap = new Map();
   const exitSet = new Set();
@@ -215,6 +215,180 @@ function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData) {
   });
 
   console.log("categorized defined", categorized);
+  return categorized;
+}
+
+function HCR_PROCESS_DATA(hcRequestSheetData, allStudentsData) {
+  const today = new Date();
+
+  const presentMap = new Map();
+  const exitSet = new Set();
+
+  function isSameDay(d1, d2) {
+    return (
+      d1 &&
+      d2 &&
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  }
+
+  function getDateValue(dateStr) {
+    if (!dateStr) return null;
+
+    const parsed = PARSE_IST_DATE(dateStr);
+
+    if (!parsed || isNaN(parsed.getTime())) return null;
+
+    return parsed;
+  }
+
+  // =====================================
+  // 1. ONLY CURRENT HOSTELLERS
+  // =====================================
+  Object.keys(allStudentsData).forEach((key) => {
+    const obj = allStudentsData[key];
+
+    if (
+      obj?.hostler === "Y" &&
+      obj?.currentResident === "Y" &&
+      obj?.gender === "Male"
+    ) {
+      presentMap.set(key, key);
+    }
+  });
+
+  // =====================================
+  // 2. REMOVE THOSE ALREADY REQUESTED
+  // BUT KEEP THOSE WHO CHECKED-IN
+  // AFTER REQUEST TIME
+  // =====================================
+  for (let i = 1; i < hcRequestSheetData.length; i++) {
+    const row = hcRequestSheetData[i];
+
+    // row[0] = Date
+    // row[1] = Request Raised DateTime
+    // row[2] = Student Names
+
+    const rowDate = getDateValue(row[0]);
+
+    // only today data
+    if (!isSameDay(rowDate, today)) continue;
+
+    const requestTime = getDateValue(row[1]);
+
+    const studentList = row[2]?.split("\n") || [];
+
+    studentList.forEach((studentName) => {
+      const cleanName = studentName.trim();
+
+      if (!cleanName) return;
+
+      const studentObj = allStudentsData[cleanName];
+
+      // =====================================
+      // IF STUDENT DATA NOT FOUND
+      // =====================================
+      if (!studentObj) {
+        exitSet.add(cleanName);
+        return;
+      }
+
+      const resident = studentObj.currentResident;
+
+      const movementTime = getDateValue(studentObj.hostelCheckincheckoutTime);
+
+      let shouldFilter = true;
+
+      // =====================================
+      // LOGIC:
+      // If checked-in after request,
+      // then DO NOT filter
+      // =====================================
+      if (resident === "Y") {
+        if (
+          movementTime &&
+          requestTime &&
+          movementTime.getTime() > requestTime.getTime()
+        ) {
+          shouldFilter = false;
+        }
+      }
+
+      // =====================================
+      // ADD TO EXIT SET
+      // =====================================
+      if (shouldFilter) {
+        exitSet.add(cleanName);
+      }
+    });
+  }
+
+  // =====================================
+  // 3. PENDING =
+  // CURRENT HOSTELLERS - FILTERED
+  // =====================================
+  const pending = Array.from(presentMap.keys()).filter(
+    (student) => !exitSet.has(student),
+  );
+
+  // =====================================
+  // 4. CATEGORY SETUP
+  // =====================================
+  const ALL_CLASS_NAME =
+    "Pre Nursery, Nursery, KG, UKG, I, II, III, IV, V, VI, VII, VIII, IX, X, XI, XII";
+
+  const categorized = {};
+
+  ALL_CLASS_NAME.split(",").forEach((c) => {
+    const cls = c.trim();
+
+    const clsHindi = CLASS_NAME_HINDI_MAP[cls] || cls;
+
+    categorized[clsHindi] = [];
+  });
+
+  // =====================================
+  // 5. FINAL PUSH
+  // =====================================
+  pending.forEach((student) => {
+    const obj = allStudentsData[student];
+
+    if (!obj) return;
+
+    const cls = obj.studentOrgClassName;
+
+    if (!cls) return;
+
+    const clsHindi = CLASS_NAME_HINDI_MAP[cls] || cls;
+
+    if (!categorized[clsHindi]) return;
+
+    categorized[clsHindi].push({
+      value: obj.studentHindiName || obj.studentName || student,
+
+      englishValue: student,
+
+      class: cls,
+
+      enableTime: obj.lastClassTime || "",
+
+      tutionTeacher: obj.tutionTeacher || "",
+    });
+  });
+
+  // =====================================
+  // 6. REMOVE EMPTY CLASSES
+  // =====================================
+  Object.keys(categorized).forEach((cls) => {
+    if (!categorized[cls]?.length) {
+      delete categorized[cls];
+    }
+  });
+
+  console.log("Final categorized pending data:", categorized);
+
   return categorized;
 }
 
