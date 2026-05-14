@@ -1,37 +1,45 @@
 let studentList = [];
 let currentSlotDetails = "";
 let attendanceTimestampMap = new Map();
+let slot_instructions = {
+  "Sleeping Slot": [
+    "Students have brushed their teeth",
+    "Tomorrow's clothes arranged",
+    "Missing essentials(brush, toothpaste, etc) taken by the student",
+    "Water bottle filled",
+    "Bedsheet on mattress",
+    "Air cooler tank filled",
+  ],
+  "Wake up Slot": [
+    "Students out of bed",
+    "Students drank water",
+    "Taken their bathrrom kit",
+    "Taken undergarments and towel",
+    "Went to bath",
+  ],
+  "Morning Program Slot": [
+    "Wearing proper school uniform(Kurta and Plain dhoti/lower)",
+    "Hair oiled",
+    "Wearing undergarments",
+    "Full body Tilak",
+    "Towel and wet clothes hung on rope",
+  ],
+};
 let time_slots = {
-  "19:35 - 23:00": {
-    name: "Sleeping Slot",
-    instructions: [
-      "Students have brushed their teeth",
-      "Tomorrow's clothes arranged",
-      "Missing essentials(brush, toothpaste, etc) taken by the student",
-      "Water bottle filled",
-      "Bedsheet on mattress",
-      "Air cooler tank filled",
-    ],
+  Mon: {
+    "19:35 - 23:00": "Sleeping Slot",
+    "04:00 - 05:30": "Wake up Slot",
+    "05:35 - 06:40": "Morning Program Slot",
   },
-  "03:30 - 05:00": {
-    name: "Wake up Slot",
-    instructions: [
-      "Students out of bed",
-      "Students drank water",
-      "Taken their bathrrom kit",
-      "Taken undergarments and towel",
-      "Went to bath",
-    ],
+  Sun: {
+    "20:05 - 23:00": "Sleeping Slot",
+    "03:30 - 05:00": "Wake up Slot",
+    "05:05 - 06:10": "Morning Program Slot",
   },
-  "05:05 - 06:10": {
-    name: "Morning Program Slot",
-    instructions: [
-      "Wearing proper school uniform(Kurta and Plain dhoti/lower)",
-      "Hair oiled",
-      "Wearing undergarments",
-      "Full body Tilak",
-      "Towel and wet clothes hung on rope",
-    ],
+  Others: {
+    "19:35 - 23:00": "Sleeping Slot",
+    "03:30 - 05:00": "Wake up Slot",
+    "05:05 - 06:10": "Morning Program Slot",
   },
 };
 
@@ -180,14 +188,33 @@ async function openAttendanceWindow(view = 0) {
 }
 
 function getCurrentTimeSlotInstructions() {
+  const now = new Date();
+
+  // Current day
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const today = days[now.getDay()];
+
+  // Decide slot group
+  let todaySlots;
+
+  if (today === "Mon") {
+    todaySlots = time_slots.Mon;
+  } else if (today === "Sun") {
+    todaySlots = time_slots.Sun;
+  } else {
+    todaySlots = time_slots.Others;
+  }
+
   // Current time in minutes
-  let now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  for (const [slot, details] of Object.entries(time_slots)) {
-    const [start, end] = slot.split(" - ");
+  // Check all slots
+  for (const [timeRange, slotName] of Object.entries(todaySlots)) {
+    const [start, end] = timeRange.split(" - ");
 
     const startMinutes = convertToMinutes(start);
+
     const endMinutes = convertToMinutes(end);
 
     let isInSlot = false;
@@ -197,16 +224,25 @@ function getCurrentTimeSlotInstructions() {
       isInSlot = currentMinutes >= startMinutes && currentMinutes < endMinutes;
     }
 
-    // Cross-midnight slot
+    // Cross midnight slot
     else {
       isInSlot = currentMinutes >= startMinutes || currentMinutes < endMinutes;
     }
 
     if (isInSlot) {
+      // END TIME
+      const submissionTime = formatMinutes(endMinutes - 5);
+
       return {
-        slot,
-        end,
-        ...details,
+        day: today,
+        name: slotName,
+        timeRange: timeRange,
+
+        instructions: [
+          `To be submitted before ${submissionTime}`,
+
+          ...(slot_instructions[slotName] || []),
+        ],
       };
     }
   }
@@ -257,4 +293,25 @@ async function markAttendance() {
   } else SHOW_ERROR_POPUP("Unable to submit data !!");
 
   return;
+}
+
+function formatMinutes(totalMinutes) {
+  // Handle negative
+  if (totalMinutes < 0) {
+    totalMinutes += 24 * 60;
+  }
+
+  let hours = Math.floor(totalMinutes / 60);
+
+  let minutes = totalMinutes % 60;
+
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+
+  if (hours === 0) {
+    hours = 12;
+  }
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
 }
