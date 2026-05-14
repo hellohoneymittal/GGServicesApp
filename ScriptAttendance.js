@@ -237,6 +237,7 @@ function getCurrentTimeSlotInstructions() {
         day: today,
         name: slotName,
         timeRange: timeRange,
+        end: end,
 
         instructions: [
           `To be submitted before ${submissionTime}`,
