@@ -420,7 +420,7 @@ function getCurrentLimit() {
 
 async function hcrStudentEntryBtnClick() {
   LOAD_HCR_PURPOSE_DROPDOWN();
-
+  SET_USER_NAME_ON_SCREEN(selectedUser?.name);
   const output = await CALL_API("GET_HCR_RAW_DATA", {});
   hcrPendingStdList = HCR_PROCESS_DATA(
     output?.data?.hcRequestSheetData,

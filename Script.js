@@ -22,19 +22,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-function setUserNameOnFrontScreen(devName) {
-  const loginUserDiv = document.getElementById("login-user-name-div_fp");
-  const loginUserLabel = document.getElementById("login-user-name-lbl_fp");
-
-  if (devName) {
-    loginUserDiv.style.display = "block";
-    loginUserLabel.innerHTML = `<strong>${devName}</strong>`;
-  } else {
-    loginUserDiv.style.display = "none";
-    loginUserLabel.innerHTML = `<strong>${devName}</strong>`;
-  }
-}
-
 async function submitPass() {
   const today = new Date();
   const todayDate = formatDateToDDMMMYYYY(today);

@@ -6,7 +6,7 @@ function renderMenus(roleData) {
   );
 
   SHOW_SPECIFIC_DIV("menuPopup");
-  setUserNameOnFrontScreen(selectedUser?.name);
+  SET_USER_NAME_ON_SCREEN(selectedUser?.name);
 }
 
 async function LOAD_HTML_FILE(fileName, containerId = "popupContainer") {
@@ -2392,6 +2392,22 @@ function SET_DIV_TITLE(popupId, titleText) {
   } else {
     console.warn("popup-title-box not found inside:", popupId);
   }
+}
+
+function SET_USER_NAME_ON_SCREEN(devName) {
+  const userBlocks = document.querySelectorAll(".user-info-block");
+
+  userBlocks.forEach((block) => {
+    if (devName) {
+      block.style.display = "block";
+
+      block.innerHTML = `<p><strong>${devName}</strong></p>`;
+    } else {
+      block.style.display = "none";
+
+      block.innerHTML = "";
+    }
+  });
 }
 
 function PARSE_IST_DATE(dateString) {

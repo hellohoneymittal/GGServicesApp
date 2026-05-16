@@ -130,13 +130,7 @@
             alt="School Logo"
           />
           <div class="flex">
-            <div
-              class="user-info-block"
-              id="login-user-name-div_fp"
-              style="display: none"
-            >
-              <p id="login-user-name-lbl_fp"></p>
-            </div>
+            <div class="user-info-block" style="display: none"></div>
 
             <button
               class="green"
@@ -183,6 +177,14 @@
 
             <button
               class="green"
+              id="createTaskBtn"
+              onclick="createTaskBtnClick()"
+            >
+              ＋ Create Task
+            </button>
+
+            <button
+              class="green"
               id="gatePassApprovalBtn"
               onclick="openGatePassWindow()"
               style="display: none"
@@ -211,5 +213,6 @@
     <script src="ScriptGatePass.js"></script>
     <script src="Script.js"></script>
     <script src="ScriptAttendance.js"></script>
+    <script src="ScriptCreateTask.js"></script>
   </body>
 </html>
