@@ -1,0 +1,375 @@
+/* =========================================================
+   TASK LIST MAIN
+========================================================= */
+
+.taskList_container * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.taskList_body {
+  background: #ececec;
+  padding: 30px;
+}
+
+.taskList_container {
+  max-width: 1200px;
+  margin: auto;
+  background: #e7c9a5;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.taskList_topBar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.taskList_titleBox {
+  flex: 1;
+  background: linear-gradient(90deg, #7b00b4, #5b00d6);
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  text-align: center;
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.taskList_refreshBtn {
+  background: #5b5b68;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0 30px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: 0.25s;
+}
+
+.taskList_refreshBtn:hover {
+  opacity: 0.9;
+}
+
+/* =========================================================
+   FILTER SECTION
+========================================================= */
+
+.taskList_filterSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.taskList_filterBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.taskList_filterBox label {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.taskList_filterBox select,
+.taskList_filterBox input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #b9b9b9;
+  background: #f5efe8;
+  font-size: 15px;
+  outline: none;
+}
+
+/* =========================================================
+   TASK LIST
+========================================================= */
+
+.taskList_taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.taskList_card {
+  background: #f6efe8;
+  border-radius: 16px;
+  overflow: hidden;
+  border-left: 8px solid #7b00b4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: 0.25s;
+}
+
+.taskList_card:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   ACTIVE CARD
+========================================================= */
+
+.taskList_card.taskList_active {
+  border-left: 8px solid #158b13;
+}
+
+.taskList_card.taskList_active .taskList_cardHeader {
+  background: #158b13;
+}
+
+.taskList_card.taskList_active .taskList_title {
+  color: white;
+}
+
+.taskList_card.taskList_active .taskList_category {
+  background: white;
+  color: #158b13;
+}
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.taskList_cardHeader {
+  padding: 18px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.taskList_cardHeader:hover {
+  background: rgba(123, 0, 180, 0.05);
+}
+
+.taskList_open {
+  background: #f39c12;
+}
+
+.taskList_completed {
+  background: #27ae60;
+}
+
+.taskList_progress {
+  background: #3498db;
+}
+
+/* =========================================================
+   ACCORDION ICON
+========================================================= */
+
+.taskList_card.taskList_active .taskList_accordionIcon {
+  transform: rotate(90deg);
+  color: white;
+}
+
+/* =========================================================
+   ACCORDION CONTENT
+========================================================= */
+
+.taskList_content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.taskList_card.taskList_active .taskList_content {
+  max-height: 700px;
+}
+
+.taskList_contentInner {
+  padding: 0 18px 18px;
+}
+
+/* =========================================================
+   DETAILS GRID
+========================================================= */
+
+.taskList_details {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.taskList_detailBox {
+  background: white;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.taskList_detailTitle {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.taskList_detailValue {
+  font-weight: bold;
+  color: #222;
+  word-break: break-word;
+}
+
+/* =========================================================
+   BUTTON ROW
+========================================================= */
+
+.taskList_buttonRow {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.taskList_btn {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.taskList_btn:hover {
+  transform: scale(1.03);
+}
+
+.taskList_viewBtn {
+  background: #5b00d6;
+  color: white;
+}
+
+.taskList_editBtn {
+  background: #ff9800;
+  color: white;
+}
+
+.taskList_closeBtn {
+  background: #43a047;
+  color: white;
+}
+
+/* =========================================================
+   CARD TOP
+========================================================= */
+
+.taskList_cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* =========================================================
+   LEFT SECTION
+========================================================= */
+
+.taskList_title_div {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* =========================================================
+   RIGHT SECTION
+========================================================= */
+
+.taskList_right {
+  width: 20%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.taskList_title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #222;
+  line-height: 1.4;
+  text-align: left;
+  word-break: break-word;
+}
+
+/* =========================================================
+   CATEGORY
+========================================================= */
+
+.taskList_category {
+  display: inline-block;
+  background: #7b00b4;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 13px;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.taskList_status {
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-weight: bold;
+  color: white;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* =========================================================
+   ACCORDION ICON
+========================================================= */
+
+.taskList_accordionIcon {
+  font-size: 22px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+  .taskList_cardTop {
+    align-items: flex-start;
+  }
+
+  .taskList_title_div {
+    width: 80%;
+  }
+
+  .taskList_title {
+    font-size: 18px;
+  }
+
+  .taskList_status {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+}

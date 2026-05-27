@@ -6,6 +6,15 @@ let selectedData = [];
 let sewaKartaList = [];
 let selectedUser = null;
 
+document.querySelectorAll(".accordion-header").forEach((header) => {
+  header.addEventListener("click", () => {
+    const content = header.nextElementSibling;
+
+    content.classList.toggle("show");
+    header.classList.toggle("active");
+  });
+});
+
 document.addEventListener("DOMContentLoaded", async function () {
   const loginData = await DB_GET(
     INDEX_DB.storeKey,

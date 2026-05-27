@@ -33,6 +33,8 @@ async function INIT_POPUPS() {
     "hostelCheckoutRequestPopup.html",
     "gatePassApproval.html",
     "attendance.html",
+    "createTaskPopup.html",
+    "taskListPopup.html",
   ];
 
   for (const file of files) {
@@ -2616,4 +2618,19 @@ function convertToMinutes(time) {
   const [hours, minutes] = time.split(":").map(Number);
 
   return hours * 60 + minutes;
+}
+
+function CONVERT_ROWS_TO_OBJECTS(data) {
+  const keys = data[0].map((header) =>
+    header
+      .replace(/[^\w\s]/g, "")
+      .toLowerCase()
+      .replace(/\s+(.)/g, (_, char) => char.toUpperCase()),
+  );
+
+  return data
+    .slice(1)
+    .map((row) =>
+      Object.fromEntries(row.map((value, index) => [keys[index], value])),
+    );
 }
