@@ -1,0 +1,59 @@
+<!doctype html>
+<div class="popup" id="taskListPopup">
+  <div class="popup-content scrollable-content">
+    <div class="user-info-block"></div>
+    <div class="refresh-button-container">
+      <div class="popup-title-box"></div>
+      <div class="refresh-button-div">
+        <button class="refresh-btn-new" onclick="">
+          <span class="refresh-text">Refresh</span>
+          <span class="refresh-icon">⟳</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="taskList_container">
+      <!-- FILTERS -->
+
+      <div class="taskList_filterSection">
+        <div class="taskList_filterBox">
+          <label>Status</label>
+
+          <select>
+            <option>All</option>
+            <option>Open</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+          </select>
+        </div>
+
+        <div class="taskList_filterBox">
+          <label>Service Type</label>
+
+          <select>
+            <option>All</option>
+            <option>Plumbing</option>
+            <option>Student Care</option>
+            <option>Electric</option>
+          </select>
+        </div>
+
+        <div class="taskList_filterBox">
+          <label>Search Task</label>
+
+          <input type="text" placeholder="Search here..." />
+        </div>
+      </div>
+
+      <!-- TASK LIST -->
+
+      <div class="taskList_taskList" id="taskList_taskList"></div>
+    </div>
+
+    <div class="taskList_buttonRow">
+      <button class="red" onclick="backToMainScreenFromCreateTask()">
+        Back
+      </button>
+    </div>
+  </div>
+</div>

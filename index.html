@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="SytlesSpecificShowTaskList.css" />
     <link rel="stylesheet" href="StyleDynamicDropdown.css" />
     <link rel="stylesheet" href="StyleRefreshButton.css" />
+    <link rel="stylesheet" href="StylesTaskList.css" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
@@ -130,13 +131,7 @@
             alt="School Logo"
           />
           <div class="flex">
-            <div
-              class="user-info-block"
-              id="login-user-name-div_fp"
-              style="display: none"
-            >
-              <p id="login-user-name-lbl_fp"></p>
-            </div>
+            <div class="user-info-block" style="display: none"></div>
 
             <button
               class="green"
@@ -154,32 +149,67 @@
               Reviewer Check List
             </button>
 
-            <button
-              class="green"
-              onclick="fillFeedback()"
-              style="display: none"
-            >
-              Fill Feedback
-            </button>
-            <button class="green" onclick="taskTracker()" style="display: none">
-              Task Tracker
-            </button>
+            <div class="accordion-container">
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  Hostel Residents Attendance System
+                  <span class="icon">▶</span>
+                </button>
+                <div class="accordion-content">
+                  <button class="green" onclick="openAttendanceWindow(1)">
+                    Current Hostel Residents
+                  </button>
 
-            <button class="green" onclick="openAttendanceWindow(1)">
-              Current Hostel Residents
-            </button>
+                  <button class="green" onclick="openAttendanceWindow()">
+                    Student Attendance
+                  </button>
+                </div>
+              </div>
+            </div>
 
-            <button class="green" onclick="openAttendanceWindow()">
-              Student Attendance
-            </button>
+            <div class="accordion-container">
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  Hostel Residents Checkout Request System
+                  <span class="icon">▶</span>
+                </button>
+                <div class="accordion-content">
+                  <button
+                    class="green"
+                    id="hostelCheckoutRequestBtn"
+                    onclick="hcrStudentEntryBtnClick()"
+                  >
+                    Hostelers Checkout Request System
+                  </button>
+                </div>
+              </div>
+            </div>
 
-            <button
-              class="green"
-              id="hostelCheckoutRequestBtn"
-              onclick="hcrStudentEntryBtnClick()"
-            >
-              Hostelers Checkout Request System
-            </button>
+            <div class="accordion-container">
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  Task Tracker
+                  <span class="icon">▶</span>
+                </button>
+                <div class="accordion-content">
+                  <button
+                    class="green"
+                    id="createTaskBtn"
+                    onclick="createTaskBtnClick()"
+                  >
+                    ＋ Create Task
+                  </button>
+
+                  <button
+                    class="green"
+                    id="taskListBtn"
+                    onclick="showTaskListPopup()"
+                  >
+                    Task List
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <button
               class="green"
@@ -209,6 +239,7 @@
     <script src="ScriptShowTask.js"></script>
     <script src="ScriptHostelCheckoutRequest.js"></script>
     <script src="ScriptGatePass.js"></script>
+    <script src="ScriptCreateTask.js"></script>
     <script src="Script.js"></script>
     <script src="ScriptAttendance.js"></script>
   </body>

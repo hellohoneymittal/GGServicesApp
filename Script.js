@@ -6,6 +6,15 @@ let selectedData = [];
 let sewaKartaList = [];
 let selectedUser = null;
 
+document.querySelectorAll(".accordion-header").forEach((header) => {
+  header.addEventListener("click", () => {
+    const content = header.nextElementSibling;
+
+    content.classList.toggle("show");
+    header.classList.toggle("active");
+  });
+});
+
 document.addEventListener("DOMContentLoaded", async function () {
   const loginData = await DB_GET(
     INDEX_DB.storeKey,
@@ -21,19 +30,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     SHOW_SPECIFIC_DIV("passwordPopup");
   }
 });
-
-function setUserNameOnFrontScreen(devName) {
-  const loginUserDiv = document.getElementById("login-user-name-div_fp");
-  const loginUserLabel = document.getElementById("login-user-name-lbl_fp");
-
-  if (devName) {
-    loginUserDiv.style.display = "block";
-    loginUserLabel.innerHTML = `<strong>${devName}</strong>`;
-  } else {
-    loginUserDiv.style.display = "none";
-    loginUserLabel.innerHTML = `<strong>${devName}</strong>`;
-  }
-}
 
 async function submitPass() {
   const today = new Date();

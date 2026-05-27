@@ -1,0 +1,83 @@
+<!doctype html>
+<div class="popup" id="createTaskPopup">
+  <div class="popup-content scrollable-content">
+    <div class="user-info-block"></div>
+    <div class="refresh-button-container">
+      <div class="popup-title-box"></div>
+      <div class="refresh-button-div">
+        <button class="refresh-btn-new" onclick="">
+          <span class="refresh-text">Refresh</span>
+          <span class="refresh-icon">⟳</span>
+        </button>
+      </div>
+    </div>
+    <div>
+      <label>Select Category</label>
+
+      <select id="categorySelect">
+        <option value="">Choose Category</option>
+      </select>
+
+      <label>Task Owner</label>
+
+      <!-- AUTO SELECTED -->
+      <input
+        type="text"
+        id="taskOwner"
+        readonly
+        placeholder="Owner auto selected"
+      />
+    </div>
+    <div class="task-buttons">
+      <label style="font-weight: bold"> Predefined Tasks </label>
+
+      <div id="taskButtonsContainer"></div>
+    </div>
+
+    <div style="margin-top: 25px">
+      <label>Task Description</label>
+
+      <textarea
+        id="taskDescription"
+        placeholder="Select predefined task OR write manual task here..."
+      ></textarea>
+    </div>
+
+    <div>
+      <label for="ctUploadControl" style="margin-bottom: 10px"
+        >Upload File</label
+      >
+      <input
+        style="width: 96% !important"
+        type="file"
+        accept="image/*"
+        id="ctUploadControl"
+        onchange="ctFetchFile()"
+      />
+    </div>
+
+    <div id="imagePreviewContainer" style="margin-top: 15px; display: none">
+      <label>Preview</label>
+
+      <img
+        id="imagePreview"
+        alt="Preview"
+        style="
+          width: 100%;
+          max-height: 250px;
+          object-fit: contain;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+          margin-top: 10px;
+        "
+      />
+    </div>
+
+    <div class="button-row">
+      <button class="red" onclick="backToMainScreenFromCreateTask()">
+        Back
+      </button>
+      <button class="green" onclick="createNewTaskBtnClick()">Proceed</button>
+    </div>
+  </div>
+</div>

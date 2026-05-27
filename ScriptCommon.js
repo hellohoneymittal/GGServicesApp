@@ -6,7 +6,7 @@ function renderMenus(roleData) {
   );
 
   SHOW_SPECIFIC_DIV("menuPopup");
-  setUserNameOnFrontScreen(selectedUser?.name);
+  SET_USER_NAME_ON_SCREEN(selectedUser?.name);
 }
 
 async function LOAD_HTML_FILE(fileName, containerId = "popupContainer") {
@@ -33,6 +33,8 @@ async function INIT_POPUPS() {
     "hostelCheckoutRequestPopup.html",
     "gatePassApproval.html",
     "attendance.html",
+    "createTaskPopup.html",
+    "taskListPopup.html",
   ];
 
   for (const file of files) {
@@ -2394,6 +2396,22 @@ function SET_DIV_TITLE(popupId, titleText) {
   }
 }
 
+function SET_USER_NAME_ON_SCREEN(devName) {
+  const userBlocks = document.querySelectorAll(".user-info-block");
+
+  userBlocks.forEach((block) => {
+    if (devName) {
+      block.style.display = "block";
+
+      block.innerHTML = `<p><strong>${devName}</strong></p>`;
+    } else {
+      block.style.display = "none";
+
+      block.innerHTML = "";
+    }
+  });
+}
+
 function PARSE_IST_DATE(dateString) {
   if (!dateString) return null;
 
@@ -2600,4 +2618,19 @@ function convertToMinutes(time) {
   const [hours, minutes] = time.split(":").map(Number);
 
   return hours * 60 + minutes;
+}
+
+function CONVERT_ROWS_TO_OBJECTS(data) {
+  const keys = data[0].map((header) =>
+    header
+      .replace(/[^\w\s]/g, "")
+      .toLowerCase()
+      .replace(/\s+(.)/g, (_, char) => char.toUpperCase()),
+  );
+
+  return data
+    .slice(1)
+    .map((row) =>
+      Object.fromEntries(row.map((value, index) => [keys[index], value])),
+    );
 }

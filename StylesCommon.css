@@ -229,7 +229,7 @@ body {
 
 .popup-content .green,
 .confirm-popup-content .green {
-  background-color: #4caf50;
+  background-color: #43a047;
   color: white;
 }
 
@@ -254,12 +254,12 @@ body {
 }
 
 .password-popup-content .green {
-  background-color: #4caf50;
+  background-color: #43a047;
   color: white;
 }
 
 .success-popup-content .green {
-  background-color: #4caf50;
+  background-color: #43a047;
   color: white;
 }
 
@@ -285,6 +285,26 @@ body {
 .stats-popup-content .red {
   background-color: #f44336;
   color: white;
+}
+
+.popup-content .orange {
+  background: #d9822b !important;
+  color: white !important;
+  cursor: pointer !important;
+}
+
+.popup-content .orange:hover {
+  background: #c46f1c !important;
+}
+
+.popup-content .lightOrange {
+  background-color: #f0d8b0 !important;
+  color: #5a3e1b !important;
+  cursor: pointer !important;
+}
+
+.popup-content .lightOrange:hover {
+  background-color: #e4c993 !important;
 }
 
 /* Radio buttons */
@@ -499,6 +519,7 @@ input {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  background-color: #fff5ea !important;
 }
 
 h2 {
@@ -1465,7 +1486,6 @@ input[type="radio"] {
   display: none;
   padding: 10px;
   border-left: 4px solid green;
-  background: #ccc;
 }
 .accordion-content a {
   display: block;
@@ -1479,11 +1499,16 @@ input[type="radio"] {
   padding: 10px 15px;
   border-radius: 5px;
 }
+
+.accordion-content.show {
+  display: block;
+}
+
 .icon {
   transition: transform 0.3s ease;
 }
 .active .icon {
-  transform: rotate(180deg);
+  transform: rotate(90deg);
 }
 
 .accordion .iframe-container {
@@ -2194,4 +2219,56 @@ input[type="radio"] {
   user-select: none;
   margin-top: 12px !important;
   font-weight: lighter;
+}
+
+.task-buttons {
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.task-btn {
+  border: 1px solid #d6b98f;
+  background: linear-gradient(145deg, #fff4e6, #f3dcc0);
+  color: #6b4b2a;
+
+  padding: 12px 18px;
+
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Hover */
+.task-btn:hover {
+  transform: translateY(-2px);
+
+  background: linear-gradient(145deg, #ffe8cc, #efd2ad);
+
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Active Click */
+.task-btn:active {
+  transform: scale(0.97);
+}
+
+/* Selected Button */
+.task-btn.selected {
+  background: linear-gradient(145deg, #c98b47, #b57435);
+  color: white;
+  border-color: #a9672c;
+
+  box-shadow: 0 4px 12px rgba(181, 116, 53, 0.35);
 }
