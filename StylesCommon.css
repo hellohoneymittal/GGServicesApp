@@ -1476,7 +1476,7 @@ input[type="radio"] {
 }
 
 .accordion-header:hover {
-  background-color: darkgreen;
+  background-color: #52609a;
 }
 .accordion-header.active {
   background-color: #ff9800;
@@ -1485,7 +1485,7 @@ input[type="radio"] {
   text-align: left;
   display: none;
   padding: 10px;
-  border-left: 4px solid green;
+  border-left: 4px solid #52609a;
 }
 .accordion-content a {
   display: block;
