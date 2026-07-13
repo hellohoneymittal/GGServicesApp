@@ -52,6 +52,7 @@ async function submitPass() {
         INDEX_DB.storeName,
       );
       selectedUser = response?.data;
+      selectedDevoteeName = response?.data?.name;
       renderMenus(response?.data?.role);
     } else {
       SHOW_ERROR_POPUP("Please input some value in password fields");

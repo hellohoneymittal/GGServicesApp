@@ -313,6 +313,7 @@
   line-height: 1.4;
   text-align: left;
   word-break: break-word;
+  white-space: pre-line;
 }
 
 /* =========================================================
@@ -372,4 +373,15 @@
     font-size: 12px;
     padding: 7px 12px;
   }
+}
+
+.taskList_btnDisabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(100%);
+  pointer-events: auto; /* Tooltip ke liye */
+}
+
+.taskList_btnDisabled:hover {
+  opacity: 0.35 !important;
 }

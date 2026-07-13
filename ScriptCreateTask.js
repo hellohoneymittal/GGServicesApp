@@ -257,18 +257,17 @@ function taskList_getStatusClass(status) {
 
 // RENDER TASKS
 
-function taskList_renderTasks() {
+function taskList_renderTasks(tasks = taskList_data) {
   const taskListContainer = document.getElementById("taskList_taskList");
 
   taskListContainer.innerHTML = "";
 
-  taskList_data.forEach((task, index) => {
+  tasks.forEach((task, index) => {
     taskListContainer.innerHTML += `
 
       <div class="taskList_card">
 
         <!-- HEADER -->
-
         <div
           class="taskList_cardHeader"
           onclick="taskList_toggleAccordion(this)"
@@ -279,39 +278,30 @@ function taskList_renderTasks() {
             <div class="taskList_title_div">
 
               <div class="taskList_title">
-                ${task.task}
+                ${task.actionDescription}
               </div>
 
               <span class="taskList_category">
-                ${task.serviceType}
+                ${task.ticketFor}
               </span>
 
-               <div class="taskList_status ${taskList_getStatusClass(task.status)}">
-                ${task.status}
+              <div class="taskList_status ${taskList_getStatusClass(task.status || "Pending")}">
+                ${task.status || "Pending"}
               </div>
 
-              
             </div>
 
-
-
             <div class="taskList_right">
-
-             
               <div class="taskList_accordionIcon">
                 ▶
               </div>
-
             </div>
 
           </div>
 
         </div>
 
-
-
         <!-- CONTENT -->
-
         <div class="taskList_content">
 
           <div class="taskList_contentInner">
@@ -319,21 +309,16 @@ function taskList_renderTasks() {
             <div class="taskList_details">
 
               <div class="taskList_detailBox">
-
                 <div class="taskList_detailTitle">
-                  Assigned Sewakarta
+                  Task Owner
                 </div>
 
                 <div class="taskList_detailValue">
-                  ${task.assigedSewakarta}
+                  ${task.actionOwnerName}
                 </div>
-
               </div>
 
-
-
               <div class="taskList_detailBox">
-
                 <div class="taskList_detailTitle">
                   Created By
                 </div>
@@ -341,26 +326,31 @@ function taskList_renderTasks() {
                 <div class="taskList_detailValue">
                   ${task.createdBy}
                 </div>
-
               </div>
 
-
-
               <div class="taskList_detailBox">
-
                 <div class="taskList_detailTitle">
-                  Created At
+                  Created On
                 </div>
 
                 <div class="taskList_detailValue">
-                  ${task.dateTime}
+                  ${task.date}
                 </div>
-
               </div>
 
             </div>
 
+            <div>
+            <label class="taskList_commentLabel">
+              Comment <span style="color:red">*</span>
+            </label>
 
+            <textarea
+              id="taskComment_${index}"
+              class="taskList_commentBox"
+              placeholder="Enter your comment..."
+            ></textarea>
+            </div>
 
             <div class="button-row">
 
@@ -369,7 +359,7 @@ function taskList_renderTasks() {
                   ? `
                     <button
                       class="taskList_btn taskList_viewBtn"
-                      onclick="window.open('${task.updatedImage}')"
+                      onclick="window.open('${task.uploadedImage}')"
                     >
                       View Attachment
                     </button>
@@ -377,7 +367,19 @@ function taskList_renderTasks() {
                   : ""
               }
 
-              <button class="taskList_btn taskList_closeBtn">
+              <button
+                class="taskList_btn taskList_editBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+                onclick="${task.canReview ? `taskList_updateStatus(${index}, 'In Progress')` : ""}"
+                ${task.canReview ? "" : "disabled"}
+                title="${task.canReview ? "Move this task to review." : "You are not the owner of this task."}">
+                In Progress
+              </button>
+
+              <button
+                class="taskList_btn taskList_closeBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+               onclick="${task.canReview ? `taskList_updateStatus(${index}, 'Complete')` : ""}"
+                ${task.canReview ? "" : "disabled"}
+                title="${task.canReview ? "Move this task to review." : "You are not the owner of this task."}">
                 Ready to Review
               </button>
 
@@ -393,6 +395,10 @@ function taskList_renderTasks() {
   });
 
   SHOW_SPECIFIC_DIV("taskListPopup");
+}
+
+function MoveToReview() {
+  alert("Review clicked");
 }
 
 function taskList_toggleAccordion(element) {
@@ -417,10 +423,115 @@ function taskList_toggleAccordion(element) {
 
 // INITIAL LOAD
 async function showTaskListPopup() {
-  const response = await CALL_API("GET_SHEET_DATA", {
-    sheetName: "Task Tracker Master",
+  const response = await CALL_API("GET_ISSUE_TRACKERSHEET_DATA", {
+    sheetName: "Pending Actions",
   });
   taskList_data = CONVERT_ROWS_TO_OBJECTS(response?.data);
+  PrepareTaskListData();
+  taskList_bindFilters();
+  taskList_applyFilters();
   SET_DIV_TITLE("taskListPopup", "Task List");
-  taskList_renderTasks();
+}
+
+function PrepareTaskListData() {
+  taskList_data = taskList_data
+    .filter((task) => task.ticketFor && task.ticketFor.startsWith("ServiceApp"))
+    .map((task) => ({
+      ...task,
+      canReview: task.actionOwnerName === selectedDevoteeName,
+    }))
+    .sort((a, b) => {
+      const aMine = a.actionOwnerName === selectedDevoteeName;
+      const bMine = b.actionOwnerName === selectedDevoteeName;
+
+      if (aMine && !bMine) return -1;
+      if (!aMine && bMine) return 1;
+
+      return 0;
+    });
+}
+
+function taskList_bindFilters() {
+  const statusDDL = document.getElementById("taskStatusFilter");
+  const serviceDDL = document.getElementById("taskServiceFilter");
+  const ownerDDL = document.getElementById("taskOwnerFilter");
+
+  const statuses = [
+    ...new Set(taskList_data.map((x) => x.status || "Pending")),
+  ].sort();
+
+  const services = [...new Set(taskList_data.map((x) => x.ticketFor))].sort();
+
+  const owners = [
+    ...new Set(taskList_data.map((x) => x.actionOwnerName)),
+  ].sort();
+
+  statusDDL.innerHTML = '<option value="All">All</option>';
+  serviceDDL.innerHTML = '<option value="All">All</option>';
+  ownerDDL.innerHTML = '<option value="All">All</option>';
+
+  statuses.forEach((x) => {
+    statusDDL.innerHTML += `<option value="${x}">${x}</option>`;
+  });
+
+  services.forEach((x) => {
+    serviceDDL.innerHTML += `<option value="${x}">${x}</option>`;
+  });
+
+  owners.forEach((x) => {
+    ownerDDL.innerHTML += `<option value="${x}">${x}</option>`;
+  });
+}
+
+function taskList_applyFilters() {
+  const status = document.getElementById("taskStatusFilter").value;
+  const service = document.getElementById("taskServiceFilter").value;
+  const owner = document.getElementById("taskOwnerFilter").value;
+  const search = document
+    .getElementById("taskSearch")
+    .value.trim()
+    .toLowerCase();
+
+  let filtered = taskList_data.filter((task) => {
+    const taskStatus = task.status || "Pending";
+
+    if (status != "All" && taskStatus != status) return false;
+
+    if (service != "All" && task.ticketFor != service) return false;
+
+    if (owner != "All" && task.actionOwnerName != owner) return false;
+
+    if (search) {
+      const found =
+        (task.actionDescription || "").toLowerCase().includes(search) ||
+        (task.ticketFor || "").toLowerCase().includes(search) ||
+        (task.actionOwnerName || "").toLowerCase().includes(search);
+
+      if (!found) return false;
+    }
+
+    return true;
+  });
+
+  taskList_renderTasks(filtered);
+}
+
+async function taskList_updateStatus(index, status) {
+  const task = taskList_data[index];
+  const taskId = task.taskId;
+  const comment = document.getElementById(`taskComment_${index}`).value.trim();
+
+  if (!comment) {
+    alert("Please enter a comment.");
+    return;
+  }
+
+  const payload = {
+    taskId,
+    comment,
+    status,
+  };
+  const response = await CALL_API("UPDATE_TASK_STATUS", payload);
+  showTaskListPopup();
+  SHOW_SUCCESS_POPUP("Task Successfully Updated");
 }
