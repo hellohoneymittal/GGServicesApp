@@ -18,30 +18,36 @@
       <div class="taskList_filterSection">
         <div class="taskList_filterBox">
           <label>Status</label>
-
-          <select>
-            <option>All</option>
-            <option>Open</option>
-            <option>In Progress</option>
-            <option>Completed</option>
-          </select>
+          <select
+            id="taskStatusFilter"
+            onchange="taskList_applyFilters()"
+          ></select>
         </div>
 
         <div class="taskList_filterBox">
           <label>Service Type</label>
-
-          <select>
-            <option>All</option>
-            <option>Plumbing</option>
-            <option>Student Care</option>
-            <option>Electric</option>
-          </select>
+          <select
+            id="taskServiceFilter"
+            onchange="taskList_applyFilters()"
+          ></select>
         </div>
 
         <div class="taskList_filterBox">
           <label>Search Task</label>
+          <input
+            id="taskSearch"
+            type="text"
+            placeholder="Search here..."
+            onkeyup="taskList_applyFilters()"
+          />
+        </div>
 
-          <input type="text" placeholder="Search here..." />
+        <div class="taskList_filterBox">
+          <label>Select Name</label>
+          <select
+            id="taskOwnerFilter"
+            onchange="taskList_applyFilters()"
+          ></select>
         </div>
       </div>
 
