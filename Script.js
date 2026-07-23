@@ -17,7 +17,7 @@ document.querySelectorAll(".accordion-header").forEach((header) => {
 
 document.addEventListener("DOMContentLoaded", async function () {
   const loginData = await DB_GET(
-    INDEX_DB.storeKey,
+    INDEX_DB.keys.LOGIN,
     INDEX_DB.dbName,
     INDEX_DB.storeName,
   );
@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   } else {
     SHOW_SPECIFIC_DIV("passwordPopup");
   }
+  checkApplicationVersion();
 });
 
 async function submitPass() {
@@ -46,8 +47,14 @@ async function submitPass() {
 
     if (response?.status && response?.data) {
       await DB_SET(
-        INDEX_DB.storeKey,
+        INDEX_DB.keys.LOGIN,
         response?.data,
+        INDEX_DB.dbName,
+        INDEX_DB.storeName,
+      );
+      await DB_SET(
+        INDEX_DB.keys.APP_VERSION,
+        APP_CONFIG.VERSION,
         INDEX_DB.dbName,
         INDEX_DB.storeName,
       );
@@ -58,6 +65,26 @@ async function submitPass() {
       SHOW_ERROR_POPUP("Please input some value in password fields");
     }
   }
+}
+
+async function checkApplicationVersion() {
+  const savedVersion = await DB_GET(
+    INDEX_DB.keys.APP_VERSION,
+    INDEX_DB.dbName,
+    INDEX_DB.storeName,
+  );
+
+  if (savedVersion && savedVersion !== APP_CONFIG.VERSION) {
+    console.log(
+      `Version changed. Old=${savedVersion}, New=${APP_CONFIG.VERSION}`,
+    );
+
+    await onLogoutClick();
+
+    return false;
+  }
+
+  return true;
 }
 
 async function submitUserResponse() {
@@ -291,7 +318,7 @@ async function callAPISaveUserServiceData() {
 }
 
 async function onLogoutClick() {
-  await DB_DELETE(INDEX_DB.storeKey, INDEX_DB.dbName, INDEX_DB.storeName);
+  await DB_CLEAR(INDEX_DB.dbName, INDEX_DB.storeName);
   document.getElementById("passworTxtBox").value = "";
   SHOW_SPECIFIC_DIV("passwordPopup");
 }

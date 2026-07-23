@@ -14,24 +14,33 @@
     <div>
       <label>Select Category</label>
 
-      <select id="categorySelect">
-        <option value="">Choose Category</option>
-      </select>
-
-      <label>Task Owner</label>
-
-      <!-- AUTO SELECTED -->
-      <input
-        type="text"
-        id="taskOwner"
-        readonly
-        placeholder="Owner auto selected"
-      />
+      <select id="categorySelect"></select>
     </div>
     <div class="task-buttons">
       <label style="font-weight: bold"> Predefined Tasks </label>
 
       <div id="taskButtonsContainer"></div>
+    </div>
+    <div>
+      <label>Task Owner</label>
+      <input
+        type="text"
+        id="taskOwner"
+        class="grayOut"
+        readonly
+        placeholder="Owner auto selected"
+      />
+    </div>
+
+    <div>
+      <label>Task Reviewer</label>
+      <input
+        type="text"
+        id="taskReviewer"
+        class="grayOut"
+        readonly
+        placeholder="Reviewer auto selected"
+      />
     </div>
 
     <div style="margin-top: 25px">
@@ -39,7 +48,7 @@
 
       <textarea
         id="taskDescription"
-        placeholder="Select predefined task OR write manual task here..."
+        placeholder="Select predefined task and modified here if required..."
       ></textarea>
     </div>
 
