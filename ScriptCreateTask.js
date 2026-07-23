@@ -18,7 +18,7 @@ const SEWAKARTA_LIST = [
   "Rishabh Karuna Mataji",
   "Padma Bhushan Prabhuji",
 ];
-
+let GET_TASK_LIST_RESPONSE = [];
 let TASK_MASTER = {};
 
 let selectedFile64String = "";
@@ -27,54 +27,45 @@ let selectedFileType = "";
 let selectedFileName = "";
 
 function convertRowsToTaskMaster(data) {
-  const headers = data[0];
   const result = {};
+
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
+
     const serviceType = row[1];
     const task = row[2];
     const owner = row[3];
+    const reviewer = row[4];
 
     if (!result[serviceType]) {
       result[serviceType] = {
-        owner: owner,
         tasks: [],
       };
     }
 
-    const taskKey = toCamelCase(task);
-
-    result[serviceType].tasks.push(task);
-  }
-
-  function toCamelCase(str) {
-    return str
-      .replace(/[^\w\s]/g, "") // remove special chars
-      .split(" ")
-      .filter(Boolean)
-      .map((word, index) => {
-        word = word.toLowerCase();
-
-        if (index === 0) return word;
-
-        return word.charAt(0).toUpperCase() + word.slice(1);
-      })
-      .join("");
+    result[serviceType].tasks.push({
+      task,
+      owner,
+      reviewer,
+    });
   }
 
   return result;
 }
 
 async function createTaskBtnClick() {
-  const response = await CALL_API("GET_TASK_LIST", {});
+  resetCreateTask();
+  const response = await CALL_API_WITH_CACHE("GET_TASK_LIST", {});
   TASK_MASTER = convertRowsToTaskMaster(response?.data);
-
   SET_DIV_TITLE("createTaskPopup", "Create Task");
   const categorySelect = document.getElementById("categorySelect");
   const taskButtonsContainer = document.getElementById("taskButtonsContainer");
   const taskDescription = document.getElementById("taskDescription");
   const taskOwner = document.getElementById("taskOwner");
+  const taskReviewer = document.getElementById("taskReviewer");
   const taskList = document.getElementById("taskList");
+
+  categorySelect.innerHTML = '<option value="">Choose Category</option>';
 
   Object.keys(TASK_MASTER).forEach((category) => {
     const option = document.createElement("option");
@@ -87,35 +78,32 @@ async function createTaskBtnClick() {
     const selectedCategory = categorySelect.value;
 
     taskButtonsContainer.innerHTML = "";
-
     taskDescription.value = "";
-
     taskOwner.value = "";
+    taskReviewer.value = "";
 
     if (!selectedCategory) return;
 
     const categoryData = TASK_MASTER[selectedCategory];
 
-    taskOwner.value = categoryData.owner;
-
-    categoryData.tasks.forEach((task) => {
+    categoryData.tasks.forEach((taskObj) => {
       const button = document.createElement("button");
 
       button.className = "task-btn";
-
-      button.textContent = task;
+      button.textContent = taskObj.task;
 
       button.addEventListener("click", () => {
-        // REMOVE OLD SELECTION
         document.querySelectorAll(".task-btn").forEach((btn) => {
           btn.classList.remove("selected");
         });
 
-        // ADD NEW SELECTION
         button.classList.add("selected");
 
-        // SET TASK
-        taskDescription.value = task;
+        // Populate on task selection
+        taskDescription.value = taskObj.task;
+        taskOwner.value = taskObj.owner;
+
+        taskReviewer.value = taskObj.reviewer;
       });
 
       taskButtonsContainer.appendChild(button);
@@ -131,6 +119,8 @@ function resetCreateTask() {
 
   // Reset owner
   document.getElementById("taskOwner").value = "";
+
+  document.getElementById("taskReviewer").value = "";
 
   // Reset description
   document.getElementById("taskDescription").value = "";
@@ -203,6 +193,7 @@ function ctFetchFile() {
 async function createNewTaskBtnClick() {
   const category = document.getElementById("categorySelect").value;
   const owner = document.getElementById("taskOwner").value;
+  const reviewer = document.getElementById("taskReviewer").value;
   const description = document.getElementById("taskDescription").value.trim();
 
   if (!category) {
@@ -211,7 +202,10 @@ async function createNewTaskBtnClick() {
   }
 
   if (!owner) {
-    SHOW_ERROR_POPUP("Task owner missing");
+    SHOW_ERROR_POPUP(
+      "Please select a predefined task first before proceeding.",
+    );
+    //SHOW_ERROR_POPUP("Task owner missing");
     return;
   }
 
@@ -227,6 +221,7 @@ async function createNewTaskBtnClick() {
     owner: owner,
     description: description,
     createdBy: selectedDevoteeName,
+    reviewer: reviewer,
     selectedFile64String: selectedFile64String ?? "",
     selectedFileType: selectedfile?.type ?? "",
     selectedFileName: selectedfile?.name ?? "",
@@ -248,8 +243,8 @@ function taskList_getStatusClass(status) {
     return "taskList_open";
   }
 
-  if (status === "Completed") {
-    return "taskList_completed";
+  if (status === "In Review") {
+    return "taskList_inreview";
   }
 
   return "taskList_progress";
@@ -318,6 +313,16 @@ function taskList_renderTasks(tasks = taskList_data) {
                 </div>
               </div>
 
+               <div class="taskList_detailBox">
+                <div class="taskList_detailTitle">
+                  Task Reviewer
+                </div>
+
+                <div class="taskList_detailValue">
+                  ${task.reviewerName}
+                </div>
+              </div>
+
               <div class="taskList_detailBox">
                 <div class="taskList_detailTitle">
                   Created By
@@ -371,16 +376,16 @@ function taskList_renderTasks(tasks = taskList_data) {
                 class="taskList_btn taskList_editBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
                 onclick="${task.canReview ? `taskList_updateStatus(${index}, 'In Progress')` : ""}"
                 ${task.canReview ? "" : "disabled"}
-                title="${task.canReview ? "Move this task to review." : "You are not the owner of this task."}">
+                title="${task.canReview ? "Move this task to In Progress" : "You are not the owner of this task."}">
                 In Progress
               </button>
 
               <button
                 class="taskList_btn taskList_closeBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
-               onclick="${task.canReview ? `taskList_updateStatus(${index}, 'Complete')` : ""}"
+               onclick="${task.canReview ? `taskList_updateStatus(${index}, 'In Review')` : ""}"
                 ${task.canReview ? "" : "disabled"}
                 title="${task.canReview ? "Move this task to review." : "You are not the owner of this task."}">
-                Ready to Review
+                In Review
               </button>
 
             </div>
@@ -462,9 +467,17 @@ function taskList_bindFilters() {
 
   const services = [...new Set(taskList_data.map((x) => x.ticketFor))].sort();
 
-  const owners = [
-    ...new Set(taskList_data.map((x) => x.actionOwnerName)),
-  ].sort();
+  let owners = [...new Set(taskList_data.map((x) => x.actionOwnerName))].sort();
+
+  // Add selected devotee at top if available
+  if (selectedDevoteeName && !owners.includes(selectedDevoteeName)) {
+    owners.unshift(selectedDevoteeName);
+  } else if (selectedDevoteeName) {
+    owners = [
+      selectedDevoteeName,
+      ...owners.filter((x) => x !== selectedDevoteeName),
+    ];
+  }
 
   statusDDL.innerHTML = '<option value="All">All</option>';
   serviceDDL.innerHTML = '<option value="All">All</option>';
@@ -481,6 +494,12 @@ function taskList_bindFilters() {
   owners.forEach((x) => {
     ownerDDL.innerHTML += `<option value="${x}">${x}</option>`;
   });
+
+  // Auto select current devotee
+  if (selectedDevoteeName) {
+    ownerDDL.value = selectedDevoteeName;
+    taskList_applyFilters();
+  }
 }
 
 function taskList_applyFilters() {
@@ -522,7 +541,7 @@ async function taskList_updateStatus(index, status) {
   const comment = document.getElementById(`taskComment_${index}`).value.trim();
 
   if (!comment) {
-    alert("Please enter a comment.");
+    SHOW_INFO_POPUP("Comment is required.");
     return;
   }
 

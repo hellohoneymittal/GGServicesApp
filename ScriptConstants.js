@@ -90,7 +90,26 @@ const VALIDATION_CONSTANT = {
 };
 
 const INDEX_DB = {
-  storeKey: "hostelAppLogin",
   dbName: "HostelAppDB",
-  storeName: "loginStore",
+  storeName: "HostelAppDBStore",
+
+  keys: {
+    LOGIN: "hostelAppLogin",
+    TASK_LIST: "taskListData",
+    TASK_MASTER: "taskMasterData",
+    USER_PROFILE: "userProfile",
+    SETTINGS: "settings",
+    APP_VERSION: "appVersion",
+  },
+};
+
+const CACHE_HOURS = {
+  ONE_HOUR: 1,
+  FIVE_HOURS: 5,
+  ONE_DAY: 24,
+  ONE_WEEK: 24 * 7,
+};
+
+const APP_CONFIG = {
+  VERSION: "1.0.1",
 };
