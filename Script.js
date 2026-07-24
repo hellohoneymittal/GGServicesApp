@@ -48,6 +48,8 @@ async function submitPass() {
         request,
       );
 
+      alert(JSON.stringify(response?.data, null, 2));
+
       if (response?.status && response?.data) {
         await DB_SET(
           INDEX_DB.keys.LOGIN,
@@ -69,6 +71,7 @@ async function submitPass() {
       }
     }
   } catch (ex) {
+    SHOW_ERROR_POPUP("In catch case:- submitPass");
     SHOW_ERROR_POPUP(ex.toString());
   }
 }
