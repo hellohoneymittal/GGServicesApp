@@ -1527,10 +1527,12 @@ function parseTimeToMinutes(timeStr) {
   return hours * 60 + minutes;
 }
 
+const DB_VERSION = 2;
+
 // Open (or create) database and object store
 function DB_OPEN_INTERNAL(dbName = "AppDB", storeName = "store") {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(dbName, 1);
+    const request = indexedDB.open(dbName, DB_VERSION);
 
     request.onupgradeneeded = function (event) {
       const db = event.target.result;
@@ -1541,7 +1543,43 @@ function DB_OPEN_INTERNAL(dbName = "AppDB", storeName = "store") {
     };
 
     request.onsuccess = function (event) {
-      resolve(event.target.result);
+      const db = event.target.result;
+
+      // Safety check for old/corrupted databases
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.close();
+
+        const deleteRequest = indexedDB.deleteDatabase(dbName);
+
+        deleteRequest.onsuccess = function () {
+          // Reopen after reset
+          const reopenRequest = indexedDB.open(dbName, DB_VERSION);
+
+          reopenRequest.onupgradeneeded = function (event) {
+            const newDb = event.target.result;
+
+            if (!newDb.objectStoreNames.contains(storeName)) {
+              newDb.createObjectStore(storeName, { keyPath: "id" });
+            }
+          };
+
+          reopenRequest.onsuccess = function (event) {
+            resolve(event.target.result);
+          };
+
+          reopenRequest.onerror = function () {
+            reject("Failed to recreate IndexedDB");
+          };
+        };
+
+        deleteRequest.onerror = function () {
+          reject("Failed to reset IndexedDB");
+        };
+
+        return;
+      }
+
+      resolve(db);
     };
 
     request.onerror = function () {
@@ -1551,26 +1589,69 @@ function DB_OPEN_INTERNAL(dbName = "AppDB", storeName = "store") {
 }
 
 // Save or update data in given store
-async function DB_SET(storeKey, data, dbName = "AppDB", storeName = "store") {
+async function DB_SET(
+  storeKey,
+  data,
+  dbName = "AppDB",
+  storeName = "store",
+  expiryHours = null,
+) {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
-  const tx = db.transaction(storeName, "readwrite");
-  const store = tx.objectStore(storeName);
 
-  store.put({ id: storeKey, data: data });
-  return tx.complete;
+  if (!db.objectStoreNames.contains(storeName)) {
+    throw new Error(
+      `IndexedDB store '${storeName}' not found in database '${dbName}'`,
+    );
+  }
+
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+
+    store.put({
+      id: storeKey,
+      data,
+      expiresAt:
+        expiryHours !== null && expiryHours !== undefined
+          ? Date.now() + expiryHours * 60 * 60 * 1000
+          : null,
+    });
+
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
 }
 
-// Get data from store by key
 async function DB_GET(storeKey, dbName = "AppDB", storeName = "store") {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
+
+  if (!db.objectStoreNames.contains(storeName)) {
+    throw new Error(
+      `IndexedDB store '${storeName}' not found in database '${dbName}'`,
+    );
+  }
 
   return new Promise((resolve) => {
     const tx = db.transaction(storeName, "readonly");
     const store = tx.objectStore(storeName);
     const request = store.get(storeKey);
 
-    request.onsuccess = function () {
-      resolve(request.result ? request.result.data : null);
+    request.onsuccess = async function () {
+      const record = request.result;
+
+      if (!record) {
+        resolve(null);
+        return;
+      }
+
+      if (record.expiresAt && Date.now() > record.expiresAt) {
+        await DB_DELETE(storeKey, dbName, storeName);
+        resolve(null);
+        return;
+      }
+
+      resolve(record.data);
     };
 
     request.onerror = function () {
@@ -1582,20 +1663,32 @@ async function DB_GET(storeKey, dbName = "AppDB", storeName = "store") {
 // Delete data from store by key
 async function DB_DELETE(storeKey, dbName = "AppDB", storeName = "store") {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
-  const tx = db.transaction(storeName, "readwrite");
-  const store = tx.objectStore(storeName);
-  store.delete(storeKey);
-  return tx.complete;
+
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+
+    store.delete(storeKey);
+
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
 }
 
 async function DB_CLEAR(dbName = "AppDB", storeName = "store") {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
-  const tx = db.transaction(storeName, "readwrite");
-  const store = tx.objectStore(storeName);
 
-  store.clear();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
 
-  return tx.complete;
+    store.clear();
+
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
 }
 
 function SHOW_BUTTON_BY_ADMIN_ROLE(buttonId, roleKey, roleObj) {
