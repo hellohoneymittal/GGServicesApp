@@ -1551,30 +1551,17 @@ function DB_OPEN_INTERNAL(dbName = "AppDB", storeName = "store") {
 }
 
 // Save or update data in given store
-async function DB_SET(
-  storeKey,
-  data,
-  dbName = "AppDB",
-  storeName = "store",
-  expiryHours = null,
-) {
+async function DB_SET(storeKey, data, dbName = "AppDB", storeName = "store") {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
   const tx = db.transaction(storeName, "readwrite");
   const store = tx.objectStore(storeName);
 
-  store.put({
-    id: storeKey,
-    data: data,
-    expiresAt:
-      expiryHours != null ? Date.now() + expiryHours * 60 * 60 * 1000 : null,
-  });
-
+  store.put({ id: storeKey, data: data });
   return tx.complete;
 }
 
 // Get data from store by key
 async function DB_GET(storeKey, dbName = "AppDB", storeName = "store") {
-  debugger;
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
 
   return new Promise((resolve) => {
@@ -1582,21 +1569,8 @@ async function DB_GET(storeKey, dbName = "AppDB", storeName = "store") {
     const store = tx.objectStore(storeName);
     const request = store.get(storeKey);
 
-    request.onsuccess = async function () {
-      const record = request.result;
-
-      if (!record) {
-        resolve(null);
-        return;
-      }
-
-      if (record.expiresAt && Date.now() > record.expiresAt) {
-        await DB_DELETE(storeKey, dbName, storeName);
-        resolve(null);
-        return;
-      }
-
-      resolve(record.data);
+    request.onsuccess = function () {
+      resolve(request.result ? request.result.data : null);
     };
 
     request.onerror = function () {
@@ -1605,13 +1579,12 @@ async function DB_GET(storeKey, dbName = "AppDB", storeName = "store") {
   });
 }
 
+// Delete data from store by key
 async function DB_DELETE(storeKey, dbName = "AppDB", storeName = "store") {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
   const tx = db.transaction(storeName, "readwrite");
   const store = tx.objectStore(storeName);
-
   store.delete(storeKey);
-
   return tx.complete;
 }
 
