@@ -258,6 +258,42 @@ function taskList_renderTasks(tasks = taskList_data) {
   taskListContainer.innerHTML = "";
 
   tasks.forEach((task, index) => {
+    let actionButtons = "";
+
+    if (task.status === "In Review") {
+      actionButtons = `
+    <button
+      class="taskList_btn taskList_editBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+      onclick="${task.canReview ? `taskList_updateStatus(${index}, 'Move Back')` : ""}"
+      ${task.canReview ? "" : "disabled"}>
+      Move Back
+    </button>
+
+    <button
+      class="taskList_btn taskList_closeBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+      onclick="${task.canReview ? `taskList_updateStatus(${index}, 'Closed')` : ""}"
+      ${task.canReview ? "" : "disabled"}>
+      Close
+    </button>
+  `;
+    } else {
+      actionButtons = `
+    <button
+      class="taskList_btn taskList_editBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+      onclick="${task.canReview ? `taskList_updateStatus(${index}, 'In Progress')` : ""}"
+      ${task.canReview ? "" : "disabled"}>
+      In Progress
+    </button>
+
+    <button
+      class="taskList_btn taskList_closeBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+      onclick="${task.canReview ? `taskList_updateStatus(${index}, 'In Review')` : ""}"
+      ${task.canReview ? "" : "disabled"}>
+      In Review
+    </button>
+  `;
+    }
+
     taskListContainer.innerHTML += `
 
       <div class="taskList_card">
@@ -273,7 +309,9 @@ function taskList_renderTasks(tasks = taskList_data) {
             <div class="taskList_title_div">
 
               <div class="taskList_title">
-                ${task.actionDescription}
+                ${(task.actionDescription || "")
+                  .replace(/\r\n/g, "<br>")
+                  .replace(/\n/g, "<br>")}
               </div>
 
               <span class="taskList_category">
@@ -372,21 +410,7 @@ function taskList_renderTasks(tasks = taskList_data) {
                   : ""
               }
 
-              <button
-                class="taskList_btn taskList_editBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
-                onclick="${task.canReview ? `taskList_updateStatus(${index}, 'In Progress')` : ""}"
-                ${task.canReview ? "" : "disabled"}
-                title="${task.canReview ? "Move this task to In Progress" : "You are not the owner of this task."}">
-                In Progress
-              </button>
-
-              <button
-                class="taskList_btn taskList_closeBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
-               onclick="${task.canReview ? `taskList_updateStatus(${index}, 'In Review')` : ""}"
-                ${task.canReview ? "" : "disabled"}
-                title="${task.canReview ? "Move this task to review." : "You are not the owner of this task."}">
-                In Review
-              </button>
+               ${actionButtons}
 
             </div>
 
@@ -432,28 +456,73 @@ async function showTaskListPopup() {
     sheetName: "Pending Actions",
   });
   taskList_data = CONVERT_ROWS_TO_OBJECTS(response?.data);
+
   PrepareTaskListData();
+  console.log("taskList_data", taskList_data);
   taskList_bindFilters();
   taskList_applyFilters();
   SET_DIV_TITLE("taskListPopup", "Task List");
 }
 
 function PrepareTaskListData() {
+  const currentUser = (selectedDevoteeName || "").trim().toLowerCase();
+
   taskList_data = taskList_data
-    .filter((task) => task.ticketFor && task.ticketFor.startsWith("ServiceApp"))
+    .filter((task) => {
+      if (!task.ticketFor?.startsWith("ServiceApp")) {
+        return false;
+      }
+
+      const status = task.status || "Pending";
+
+      const owner = (task.actionOwnerName || "").trim().toLowerCase();
+
+      const reviewer = (task.reviewerName || "").trim().toLowerCase();
+
+      // Pending & In Progress -> Owner
+      if (
+        (status === "Pending" || status === "In Progress") &&
+        owner === currentUser
+      ) {
+        return true;
+      }
+
+      // In Review -> Reviewer
+      if (status === "In Review" && reviewer === currentUser) {
+        return true;
+      }
+
+      return false;
+    })
     .map((task) => ({
       ...task,
-      canReview: task.actionOwnerName === selectedDevoteeName,
+
+      // Buttons enable logic
+      canReview:
+        ((task.status === "Pending" || task.status === "In Progress") &&
+          task.actionOwnerName === selectedDevoteeName) ||
+        (task.status === "In Review" &&
+          task.reviewerName === selectedDevoteeName),
     }))
     .sort((a, b) => {
-      const aMine = a.actionOwnerName === selectedDevoteeName;
-      const bMine = b.actionOwnerName === selectedDevoteeName;
+      const aMine =
+        ((a.status === "Pending" || a.status === "In Progress") &&
+          a.actionOwnerName === selectedDevoteeName) ||
+        (a.status === "In Review" && a.reviewerName === selectedDevoteeName);
+
+      const bMine =
+        ((b.status === "Pending" || b.status === "In Progress") &&
+          b.actionOwnerName === selectedDevoteeName) ||
+        (b.status === "In Review" && b.reviewerName === selectedDevoteeName);
 
       if (aMine && !bMine) return -1;
       if (!aMine && bMine) return 1;
 
       return 0;
     });
+
+  debugger;
+  console.log("after filter", taskList_data);
 }
 
 function taskList_bindFilters() {
@@ -467,7 +536,13 @@ function taskList_bindFilters() {
 
   const services = [...new Set(taskList_data.map((x) => x.ticketFor))].sort();
 
-  let owners = [...new Set(taskList_data.map((x) => x.actionOwnerName))].sort();
+  let owners = [
+    ...new Set(
+      taskList_data.flatMap((x) => [x.actionOwnerName, x.reviewerName]),
+    ),
+  ]
+    .filter(Boolean)
+    .sort();
 
   // Add selected devotee at top if available
   if (selectedDevoteeName && !owners.includes(selectedDevoteeName)) {
@@ -518,7 +593,14 @@ function taskList_applyFilters() {
 
     if (service != "All" && task.ticketFor != service) return false;
 
-    if (owner != "All" && task.actionOwnerName != owner) return false;
+    if (owner != "All") {
+      const filterName =
+        task.status === "In Review" ? task.reviewerName : task.actionOwnerName;
+
+      if (filterName != owner) {
+        return false;
+      }
+    }
 
     if (search) {
       const found =
@@ -535,22 +617,40 @@ function taskList_applyFilters() {
   taskList_renderTasks(filtered);
 }
 
-async function taskList_updateStatus(index, status) {
-  const task = taskList_data[index];
-  const taskId = task.taskId;
+async function taskList_updateStatus(index, newStatus) {
   const comment = document.getElementById(`taskComment_${index}`).value.trim();
 
   if (!comment) {
-    SHOW_INFO_POPUP("Comment is required.");
+    SHOW_INFO_POPUP("Please enter a comment.");
     return;
   }
 
-  const payload = {
-    taskId,
+  const task = taskList_data[index];
+
+  const request = {
+    taskId: task.taskId,
     comment,
-    status,
+    status: newStatus,
   };
-  const response = await CALL_API("UPDATE_TASK_STATUS", payload);
-  showTaskListPopup();
-  SHOW_SUCCESS_POPUP("Task Successfully Updated");
+
+  const response = await CALL_API("UPDATE_TASK_STATUS", request);
+
+  if (response?.status) {
+    // Local update
+    if (newStatus === "Move Back") {
+      task.status = "In Progress";
+      task.reviewerComment = comment;
+    } else if (newStatus === "Closed") {
+      task.status = "Closed";
+      task.reviewerComment = comment;
+    } else {
+      task.status = newStatus;
+      task.remarks = comment;
+    }
+
+    SHOW_SUCCESS_POPUP("Task updated successfully.");
+
+    // Re-apply existing filters and re-render
+    taskList_applyFilters();
+  }
 }

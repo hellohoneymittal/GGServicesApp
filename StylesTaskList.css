@@ -124,22 +124,27 @@
 /* =========================================================
    ACTIVE CARD
 ========================================================= */
-
 .taskList_card.taskList_active {
-  border-left: 8px solid #158b13;
+  border-left: 8px solid #7b00b4;
+  box-shadow: 0 6px 18px rgba(123, 0, 180, 0.18);
 }
 
 .taskList_card.taskList_active .taskList_cardHeader {
-  background: #158b13;
+  background: rgba(123, 0, 180, 0.08);
 }
 
 .taskList_card.taskList_active .taskList_title {
-  color: white;
+  color: #222;
 }
 
 .taskList_card.taskList_active .taskList_category {
-  background: white;
-  color: #158b13;
+  background: #7b00b4;
+  color: white;
+}
+
+.taskList_card.taskList_active .taskList_accordionIcon {
+  transform: rotate(90deg);
+  color: #7b00b4;
 }
 
 /* =========================================================
@@ -147,7 +152,7 @@
 ========================================================= */
 
 .taskList_cardHeader {
-  padding: 18px;
+  padding: 10px;
   cursor: pointer;
   transition: 0.25s;
 }
@@ -313,7 +318,6 @@
   line-height: 1.4;
   text-align: left;
   word-break: break-word;
-  white-space: pre-line;
 }
 
 /* =========================================================
@@ -357,21 +361,93 @@
 ========================================================= */
 
 @media (max-width: 700px) {
+  .taskList_taskList {
+    gap: 10px;
+  }
+
+  .taskList_card {
+    border-left-width: 5px;
+    border-radius: 12px;
+  }
+
+  .taskList_cardHeader {
+    padding: 6px 8px;
+  }
+
   .taskList_cardTop {
     align-items: flex-start;
+    gap: 6px;
   }
 
   .taskList_title_div {
-    width: 80%;
+    width: 88%;
+    gap: 4px;
+  }
+
+  .taskList_right {
+    width: 12%;
   }
 
   .taskList_title {
-    font-size: 18px;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .taskList_category {
+    font-size: 11px;
+    padding: 3px 10px;
   }
 
   .taskList_status {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .taskList_accordionIcon {
+    font-size: 16px;
+  }
+
+  .taskList_card.taskList_active .taskList_content {
+    max-height: 1000px;
+  }
+
+  .taskList_contentInner {
+    padding: 0 12px 12px;
+  }
+
+  .taskList_details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .taskList_detailBox {
+    padding: 6px 10px;
+  }
+  .taskList_detailTitle {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  .taskList_detailValue {
+    font-size: 13px;
+  }
+
+  .taskList_commentBox {
+    min-height: 70px;
+    font-size: 13px;
+  }
+
+  .button-row,
+  .taskList_buttonRow {
+    margin-top: 10px;
+    gap: 8px;
+  }
+
+  .taskList_btn {
+    padding: 8px 12px;
     font-size: 12px;
-    padding: 7px 12px;
+    border-radius: 8px;
   }
 }
 
