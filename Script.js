@@ -29,62 +29,48 @@ document.addEventListener("DOMContentLoaded", async function () {
   } else {
     SHOW_SPECIFIC_DIV("passwordPopup");
   }
-  checkApplicationVersion();
 });
 
 async function submitPass() {
-  const today = new Date();
-  const todayDate = formatDateToDDMMMYYYY(today);
+  try {
+    const today = new Date();
+    const todayDate = formatDateToDDMMMYYYY(today);
 
-  let password = GetControlValue("passworTxtBox");
-  if (password) {
-    password = password.toLowerCase().toString().trim();
-    const request = {
-      password: password,
-    };
+    let password = GetControlValue("passworTxtBox");
+    if (password) {
+      password = password.toLowerCase().toString().trim();
+      const request = {
+        password: password,
+      };
 
-    const response = await CALL_API("GET_DEVOTEE_ACCESS_BY_PASSWORD", request);
-
-    if (response?.status && response?.data) {
-      await DB_SET(
-        INDEX_DB.keys.LOGIN,
-        response?.data,
-        INDEX_DB.dbName,
-        INDEX_DB.storeName,
+      const response = await CALL_API(
+        "GET_DEVOTEE_ACCESS_BY_PASSWORD",
+        request,
       );
-      await DB_SET(
-        INDEX_DB.keys.APP_VERSION,
-        APP_CONFIG.VERSION,
-        INDEX_DB.dbName,
-        INDEX_DB.storeName,
-      );
-      selectedUser = response?.data;
-      selectedDevoteeName = response?.data?.name;
-      renderMenus(response?.data?.role);
-    } else {
-      SHOW_ERROR_POPUP("Please input some value in password fields");
+
+      if (response?.status && response?.data) {
+        await DB_SET(
+          INDEX_DB.keys.LOGIN,
+          response?.data,
+          INDEX_DB.dbName,
+          INDEX_DB.storeName,
+        );
+        await DB_SET(
+          INDEX_DB.keys.APP_VERSION,
+          APP_CONFIG.VERSION,
+          INDEX_DB.dbName,
+          INDEX_DB.storeName,
+        );
+        selectedUser = response?.data;
+        selectedDevoteeName = response?.data?.name;
+        renderMenus(response?.data?.role);
+      } else {
+        SHOW_ERROR_POPUP("Please input some value in password fields");
+      }
     }
+  } catch (ex) {
+    SHOW_ERROR_POPUP(ex.toString());
   }
-}
-
-async function checkApplicationVersion() {
-  const savedVersion = await DB_GET(
-    INDEX_DB.keys.APP_VERSION,
-    INDEX_DB.dbName,
-    INDEX_DB.storeName,
-  );
-
-  if (savedVersion && savedVersion !== APP_CONFIG.VERSION) {
-    console.log(
-      `Version changed. Old=${savedVersion}, New=${APP_CONFIG.VERSION}`,
-    );
-
-    await onLogoutClick();
-
-    return false;
-  }
-
-  return true;
 }
 
 async function submitUserResponse() {
