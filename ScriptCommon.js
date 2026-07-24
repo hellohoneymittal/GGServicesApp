@@ -1559,24 +1559,17 @@ async function DB_SET(
   expiryHours = null,
 ) {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
+  const tx = db.transaction(storeName, "readwrite");
+  const store = tx.objectStore(storeName);
 
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-
-    store.put({
-      id: storeKey,
-      data,
-      expiresAt:
-        expiryHours !== null && expiryHours !== undefined
-          ? Date.now() + expiryHours * 60 * 60 * 1000
-          : null,
-    });
-
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
+  store.put({
+    id: storeKey,
+    data: data,
+    expiresAt:
+      expiryHours != null ? Date.now() + expiryHours * 60 * 60 * 1000 : null,
   });
+
+  return tx.complete;
 }
 
 // Get data from store by key
@@ -1612,35 +1605,24 @@ async function DB_GET(storeKey, dbName = "AppDB", storeName = "store") {
   });
 }
 
-// Delete data from store by key
 async function DB_DELETE(storeKey, dbName = "AppDB", storeName = "store") {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
+  const tx = db.transaction(storeName, "readwrite");
+  const store = tx.objectStore(storeName);
 
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
+  store.delete(storeKey);
 
-    store.delete(storeKey);
-
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-  });
+  return tx.complete;
 }
 
 async function DB_CLEAR(dbName = "AppDB", storeName = "store") {
   const db = await DB_OPEN_INTERNAL(dbName, storeName);
+  const tx = db.transaction(storeName, "readwrite");
+  const store = tx.objectStore(storeName);
 
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
+  store.clear();
 
-    store.clear();
-
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-  });
+  return tx.complete;
 }
 
 function SHOW_BUTTON_BY_ADMIN_ROLE(buttonId, roleKey, roleObj) {
