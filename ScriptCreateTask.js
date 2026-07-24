@@ -234,6 +234,7 @@ async function createNewTaskBtnClick() {
 
 //-------------------------------  Task List ---------------------------------------------- //
 
+let taskList_allData = [];
 let taskList_data = [];
 
 // STATUS CLASS
@@ -455,7 +456,8 @@ async function showTaskListPopup() {
   const response = await CALL_API("GET_ISSUE_TRACKERSHEET_DATA", {
     sheetName: "Pending Actions",
   });
-  taskList_data = CONVERT_ROWS_TO_OBJECTS(response?.data);
+  taskList_allData = CONVERT_ROWS_TO_OBJECTS(response?.data);
+  taskList_data = [...taskList_allData];
 
   PrepareTaskListData();
   console.log("taskList_data", taskList_data);
@@ -465,64 +467,16 @@ async function showTaskListPopup() {
 }
 
 function PrepareTaskListData() {
-  const currentUser = (selectedDevoteeName || "").trim().toLowerCase();
-
-  taskList_data = taskList_data
-    .filter((task) => {
-      if (!task.ticketFor?.startsWith("ServiceApp")) {
-        return false;
-      }
-
-      const status = task.status || "Pending";
-
-      const owner = (task.actionOwnerName || "").trim().toLowerCase();
-
-      const reviewer = (task.reviewerName || "").trim().toLowerCase();
-
-      // Pending & In Progress -> Owner
-      if (
-        (status === "Pending" || status === "In Progress") &&
-        owner === currentUser
-      ) {
-        return true;
-      }
-
-      // In Review -> Reviewer
-      if (status === "In Review" && reviewer === currentUser) {
-        return true;
-      }
-
-      return false;
-    })
+  taskList_data = [...taskList_allData]
+    .filter((task) => task.ticketFor?.startsWith("ServiceApp"))
     .map((task) => ({
       ...task,
-
-      // Buttons enable logic
       canReview:
         ((task.status === "Pending" || task.status === "In Progress") &&
           task.actionOwnerName === selectedDevoteeName) ||
         (task.status === "In Review" &&
           task.reviewerName === selectedDevoteeName),
-    }))
-    .sort((a, b) => {
-      const aMine =
-        ((a.status === "Pending" || a.status === "In Progress") &&
-          a.actionOwnerName === selectedDevoteeName) ||
-        (a.status === "In Review" && a.reviewerName === selectedDevoteeName);
-
-      const bMine =
-        ((b.status === "Pending" || b.status === "In Progress") &&
-          b.actionOwnerName === selectedDevoteeName) ||
-        (b.status === "In Review" && b.reviewerName === selectedDevoteeName);
-
-      if (aMine && !bMine) return -1;
-      if (!aMine && bMine) return 1;
-
-      return 0;
-    });
-
-  debugger;
-  console.log("after filter", taskList_data);
+    }));
 }
 
 function taskList_bindFilters() {
@@ -586,33 +540,53 @@ function taskList_applyFilters() {
     .value.trim()
     .toLowerCase();
 
-  let filtered = taskList_data.filter((task) => {
+  const filtered = taskList_allData.filter((task) => {
     const taskStatus = task.status || "Pending";
 
-    if (status != "All" && taskStatus != status) return false;
+    // Status Filter
+    if (status !== "All" && taskStatus !== status) {
+      return false;
+    }
 
-    if (service != "All" && task.ticketFor != service) return false;
+    // Service Filter
+    if (service !== "All" && task.ticketFor !== service) {
+      return false;
+    }
 
-    if (owner != "All") {
-      const filterName =
-        task.status === "In Review" ? task.reviewerName : task.actionOwnerName;
+    // Owner Filter
+    if (owner !== "All") {
+      const taskOwner =
+        taskStatus === "In Review"
+          ? task.reviewerName || ""
+          : task.actionOwnerName || "";
 
-      if (filterName != owner) {
+      if (taskOwner !== owner) {
         return false;
       }
     }
 
+    // Search Filter
     if (search) {
-      const found =
-        (task.actionDescription || "").toLowerCase().includes(search) ||
-        (task.ticketFor || "").toLowerCase().includes(search) ||
-        (task.actionOwnerName || "").toLowerCase().includes(search);
+      const searchableText = [
+        task.actionDescription || "",
+        task.ticketFor || "",
+        task.actionOwnerName || "",
+        task.reviewerName || "",
+        task.status || "",
+      ]
+        .join(" ")
+        .toLowerCase();
 
-      if (!found) return false;
+      if (!searchableText.includes(search)) {
+        return false;
+      }
     }
 
     return true;
   });
+
+  console.log("Selected Owner:", owner);
+  console.log("Filtered Count:", filtered.length);
 
   taskList_renderTasks(filtered);
 }
