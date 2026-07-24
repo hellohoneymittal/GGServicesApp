@@ -48,8 +48,6 @@ async function submitPass() {
         request,
       );
 
-      alert(JSON.stringify(response?.data, null, 2));
-
       if (response?.status && response?.data) {
         await DB_SET(
           INDEX_DB.keys.LOGIN,
