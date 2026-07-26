@@ -95,6 +95,30 @@
         </div>
       </div>
 
+      <div class="popup" id="verificationGridPopup">
+        <div
+          class="popup-content scrollable-content"
+          id="verificationGridSubPopup"
+        >
+          <img
+            src="https://drive.google.com/thumbnail?id=15-SQ9oW0U2eX2vsWmyxvmhwu9Q1QgOZm&sz=w500"
+            alt="School Logo"
+          />
+          <div
+            class="user-info-block"
+            id="verifyDetailsHeading_div"
+            style="display: none"
+          >
+            <p id="verifyDetailsHeading_lbl"></p>
+          </div>
+          <div class="heading" id="gridHeading">Verify Details</div>
+          <div class="button-row">
+            <button class="red" id="verificationBackButton">Back</button>
+            <button class="green" id="verificationSubmitBtn">Submit</button>
+          </div>
+        </div>
+      </div>
+
       <div class="popup" style="display: flex" id="passwordPopup">
         <div class="popup-content scrollable-content">
           <img
@@ -210,6 +234,10 @@
                 </div>
               </div>
             </div>
+
+            <button class="green" onclick="openFreeSlotsWindow()">
+              Check Free Classes
+            </button>
 
             <button
               class="green"

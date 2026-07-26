@@ -229,6 +229,7 @@ function openVerifyDetailsWindow(
   returnId = "",
   gridHeading = "Verify Details",
   buttonLables = ["Submit", "Back"],
+  sortflag = 0,
 ) {
   const parent_popup = document.getElementById("verificationGridPopup");
   const popup = document.getElementById("verificationGridSubPopup");
@@ -323,6 +324,7 @@ function openVerifyDetailsWindow(
       columnNames,
       inputMap[headerArr[cntr]],
       cntr,
+      sortflag,
     );
   }
 
@@ -336,7 +338,10 @@ function populateActionGrid(
   columnNames,
   gridData,
   instance = 0,
+  sortFlag = 0,
 ) {
+  let i;
+  let keyArr = Object.keys(gridData);
   const gridContainer = document.getElementById(
     inputType + "GridContainer_" + instance,
   );
@@ -373,27 +378,26 @@ function populateActionGrid(
   console.info(gridData);
 
   // Populate table rows dynamically from gridData
-  for (let key in gridData) {
+  let dataEntries = Object.entries(gridData);
+
+  if (sortFlag === 1) {
+    keyArr.sort();
+    console.info(keyArr);
+  }
+
+  for (i = 0; i < keyArr.length; i++) {
     const row = document.createElement("tr");
-    let spiritualFlag = gridData[key]["Spiritual Mentor's Name"] == "" ? 0 : 1;
     row.id = `${inputType}GridTRow_${instance}_${totalRows}`;
-    row.dataset.name = `TableRow_${gridData[key]["row"]}_${gridData[key]["Student Name"]}_${spiritualFlag}_${key}`;
 
-    if (gridData[key]["red"] != null && gridData[key]["red"] == 1) {
-      row.style.backgroundColor = "#b81414";
-      row.style.color = "white";
-    }
-
-    // Add each data field into a new table cell (td)
     columnNames.forEach((column) => {
-      if (gridData[key][column] == null) return;
+      if (gridData[keyArr[i]][column] == null) return;
+
       const td = document.createElement("td");
-      td.textContent = gridData[key][column];
+      td.textContent = gridData[keyArr[i]][column];
       row.appendChild(td);
     });
 
     totalRows++;
-
     tbody.appendChild(row);
   }
   table.appendChild(tbody);

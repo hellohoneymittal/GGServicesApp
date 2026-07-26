@@ -547,3 +547,36 @@ function CREATE_ACCORDION_FROM_OBJECT(accordionContainerId, dataObject) {
     checklistEl.dataset.presentNo = enableOthers ? "0" : "1";
   }
 }
+
+async function openFreeSlotsWindow() {
+  const outputData = await CALL_API(API_TYPE_CONSTANT.GET_FREE_SLOTS, {});
+  if (outputData?.status && outputData.data) {
+    if (typeof outputData.data === "string") {
+      if (outputData.data.includes("ERR"))
+        SHOW_ERROR_POPUP(outputData.data.split("ERR: ")[1]);
+      else SHOW_INFO_POPUP(outputData.data);
+      return;
+    }
+
+    if (Object.keys(outputData.data.output).length == 0) {
+      SHOW_INFO_POPUP(`No FREE SLOTS found for: ${outputData.data.out_dt}!`);
+      return;
+    }
+
+    console.log(outputData.data);
+
+    openVerifyDetailsWindow(
+      outputData.data.header,
+      [`Free Slots on: ${outputData.data.out_dt}`],
+      outputData.data.output,
+      () => SHOW_SPECIFIC_DIV("menuPopup"),
+      "",
+      "",
+      ["Ok"],
+      1,
+    );
+  } else {
+    SHOW_ERROR_POPUP("Unable to fetch the free slots!!");
+    return;
+  }
+}
