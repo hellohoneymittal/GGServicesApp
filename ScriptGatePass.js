@@ -378,8 +378,6 @@ function populateActionGrid(
   console.info(gridData);
 
   // Populate table rows dynamically from gridData
-  let dataEntries = Object.entries(gridData);
-
   if (sortFlag === 1) {
     keyArr.sort();
     console.info(keyArr);
