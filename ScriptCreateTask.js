@@ -253,7 +253,7 @@ function taskList_getStatusClass(status) {
 
 // RENDER TASKS
 
-function taskList_renderTasks(tasks = taskList_data) {
+function old_taskList_renderTasks(tasks = taskList_data) {
   const taskListContainer = document.getElementById("taskList_taskList");
 
   taskListContainer.innerHTML = "";
@@ -427,6 +427,178 @@ function taskList_renderTasks(tasks = taskList_data) {
   SHOW_SPECIFIC_DIV("taskListPopup");
 }
 
+function taskList_renderTasks(tasks = taskList_data) {
+  const taskListContainer = document.getElementById("taskList_taskList");
+
+  taskListContainer.innerHTML = "";
+
+  tasks.forEach((task) => {
+    let actionButtons = "";
+
+    if (task.status === "In Review") {
+      actionButtons = `
+        <button
+          class="taskList_btn taskList_editBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+          onclick="${task.canReview ? `taskList_updateStatus('${task.taskId}', 'Move Back')` : ""}"
+          ${task.canReview ? "" : "disabled"}>
+          Move Back
+        </button>
+
+        <button
+          class="taskList_btn taskList_closeBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+          onclick="${task.canReview ? `taskList_updateStatus('${task.taskId}', 'Closed')` : ""}"
+          ${task.canReview ? "" : "disabled"}>
+          Close
+        </button>
+      `;
+    } else {
+      actionButtons = `
+        <button
+          class="taskList_btn taskList_editBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+          onclick="${task.canReview ? `taskList_updateStatus('${task.taskId}', 'In Progress')` : ""}"
+          ${task.canReview ? "" : "disabled"}>
+          In Progress
+        </button>
+
+        <button
+          class="taskList_btn taskList_closeBtn ${task.canReview ? "" : "taskList_btnDisabled"}"
+          onclick="${task.canReview ? `taskList_updateStatus('${task.taskId}', 'In Review')` : ""}"
+          ${task.canReview ? "" : "disabled"}>
+          In Review
+        </button>
+      `;
+    }
+
+    taskListContainer.innerHTML += `
+      <div class="taskList_card">
+
+        <!-- HEADER -->
+        <div
+          class="taskList_cardHeader"
+          onclick="taskList_toggleAccordion(this)"
+        >
+
+          <div class="taskList_cardTop">
+
+            <div class="taskList_title_div">
+
+              <div class="taskList_title">
+                ${(task.actionDescription || "")
+                  .replace(/\r\n/g, "<br>")
+                  .replace(/\n/g, "<br>")}
+              </div>
+
+              <span class="taskList_category">
+                ${task.ticketFor}
+              </span>
+
+              <div class="taskList_status ${taskList_getStatusClass(task.status)}">
+                ${task.status}
+              </div>
+
+            </div>
+
+            <div class="taskList_right">
+              <div class="taskList_accordionIcon">
+                ▶
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- CONTENT -->
+        <div class="taskList_content">
+
+          <div class="taskList_contentInner">
+
+            <div class="taskList_details">
+
+              <div class="taskList_detailBox">
+                <div class="taskList_detailTitle">
+                  Task Owner
+                </div>
+
+                <div class="taskList_detailValue">
+                  ${task.actionOwnerName}
+                </div>
+              </div>
+
+              <div class="taskList_detailBox">
+                <div class="taskList_detailTitle">
+                  Task Reviewer
+                </div>
+
+                <div class="taskList_detailValue">
+                  ${task.reviewerName}
+                </div>
+              </div>
+
+              <div class="taskList_detailBox">
+                <div class="taskList_detailTitle">
+                  Created By
+                </div>
+
+                <div class="taskList_detailValue">
+                  ${task.createdBy}
+                </div>
+              </div>
+
+              <div class="taskList_detailBox">
+                <div class="taskList_detailTitle">
+                  Created On
+                </div>
+
+                <div class="taskList_detailValue">
+                  ${task.date}
+                </div>
+              </div>
+
+            </div>
+
+            <div>
+              <label class="taskList_commentLabel">
+                Comment <span style="color:red">*</span>
+              </label>
+
+              <textarea
+                id="taskComment_${task.taskId}"
+                class="taskList_commentBox"
+                placeholder="Enter your comment..."
+              ></textarea>
+            </div>
+
+            <div class="button-row">
+
+              ${
+                task.uploadedImage
+                  ? `
+                    <button
+                      class="taskList_btn taskList_viewBtn"
+                      onclick="window.open('${task.uploadedImage}')"
+                    >
+                      View Attachment
+                    </button>
+                  `
+                  : ""
+              }
+
+              ${actionButtons}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  });
+
+  SHOW_SPECIFIC_DIV("taskListPopup");
+}
+
 function MoveToReview() {
   alert("Review clicked");
 }
@@ -466,7 +638,7 @@ async function showTaskListPopup() {
   SET_DIV_TITLE("taskListPopup", "Task List");
 }
 
-function PrepareTaskListData() {
+function old_PrepareTaskListData() {
   taskList_data = [...taskList_allData]
     .filter((task) => task.ticketFor?.startsWith("ServiceApp"))
     .map((task) => ({
@@ -479,7 +651,24 @@ function PrepareTaskListData() {
     }));
 }
 
-function taskList_bindFilters() {
+function PrepareTaskListData() {
+  taskList_data = taskList_allData
+    .filter((task) => task.ticketFor?.startsWith("ServiceApp"))
+    .map((task) => {
+      const status = task.status || "Pending";
+
+      return {
+        ...task,
+        status,
+        canReview:
+          ((status === "Pending" || status === "In Progress") &&
+            task.actionOwnerName === selectedDevoteeName) ||
+          (status === "In Review" && task.reviewerName === selectedDevoteeName),
+      };
+    });
+}
+
+function old_taskList_bindFilters() {
   const statusDDL = document.getElementById("taskStatusFilter");
   const serviceDDL = document.getElementById("taskServiceFilter");
   const ownerDDL = document.getElementById("taskOwnerFilter");
@@ -531,7 +720,64 @@ function taskList_bindFilters() {
   }
 }
 
-function taskList_applyFilters() {
+function taskList_bindFilters() {
+  const statusDDL = document.getElementById("taskStatusFilter");
+  const serviceDDL = document.getElementById("taskServiceFilter");
+  const ownerDDL = document.getElementById("taskOwnerFilter");
+
+  // Get unique Statuses
+  const statuses = [...new Set(taskList_data.map((x) => x.status))].sort();
+
+  // Get unique Services
+  const services = [...new Set(taskList_data.map((x) => x.ticketFor))].sort();
+
+  // Get unique Owners & Reviewers
+  let owners = [
+    ...new Set(
+      taskList_data.flatMap((x) => [x.actionOwnerName, x.reviewerName]),
+    ),
+  ]
+    .filter(Boolean)
+    .sort();
+
+  // Keep current devotee at top
+  if (selectedDevoteeName) {
+    owners = [
+      selectedDevoteeName,
+      ...owners.filter((x) => x !== selectedDevoteeName),
+    ];
+  }
+
+  // Reset dropdowns
+  statusDDL.innerHTML = '<option value="All">All</option>';
+  serviceDDL.innerHTML = '<option value="All">All</option>';
+  ownerDDL.innerHTML = '<option value="All">All</option>';
+
+  // Bind Status
+  statuses.forEach((status) => {
+    statusDDL.innerHTML += `<option value="${status}">${status}</option>`;
+  });
+
+  // Bind Service
+  services.forEach((service) => {
+    serviceDDL.innerHTML += `<option value="${service}">${service}</option>`;
+  });
+
+  // Bind Owners
+  owners.forEach((owner) => {
+    ownerDDL.innerHTML += `<option value="${owner}">${owner}</option>`;
+  });
+
+  // Default selected owner
+  if (selectedDevoteeName) {
+    ownerDDL.value = selectedDevoteeName;
+  }
+
+  // Initial render using current filters
+  taskList_applyFilters();
+}
+
+function old_taskList_applyFilters() {
   const status = document.getElementById("taskStatusFilter").value;
   const service = document.getElementById("taskServiceFilter").value;
   const owner = document.getElementById("taskOwnerFilter").value;
@@ -591,15 +837,80 @@ function taskList_applyFilters() {
   taskList_renderTasks(filtered);
 }
 
-async function taskList_updateStatus(index, newStatus) {
-  const comment = document.getElementById(`taskComment_${index}`).value.trim();
+function taskList_applyFilters() {
+  const status = document.getElementById("taskStatusFilter").value;
+  const service = document.getElementById("taskServiceFilter").value;
+  const owner = document.getElementById("taskOwnerFilter").value;
+  const search = document
+    .getElementById("taskSearch")
+    .value.trim()
+    .toLowerCase();
+
+  const filtered = taskList_data.filter((task) => {
+    // Status Filter
+    if (status !== "All" && task.status !== status) {
+      return false;
+    }
+
+    // Service Filter
+    if (service !== "All" && task.ticketFor !== service) {
+      return false;
+    }
+
+    // Owner Filter
+    if (owner !== "All") {
+      const taskOwner =
+        task.status === "In Review"
+          ? task.reviewerName || ""
+          : task.actionOwnerName || "";
+
+      if (taskOwner !== owner) {
+        return false;
+      }
+    }
+
+    // Search Filter
+    if (search) {
+      const searchableText = [
+        task.actionDescription || "",
+        task.ticketFor || "",
+        task.actionOwnerName || "",
+        task.reviewerName || "",
+        task.status || "",
+        task.createdBy || "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      if (!searchableText.includes(search)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  console.log("Selected Owner:", owner);
+  console.log("Filtered Count:", filtered.length);
+
+  taskList_renderTasks(filtered);
+}
+
+async function taskList_updateStatus(taskId, newStatus) {
+  const comment = document.getElementById(`taskComment_${taskId}`).value.trim();
 
   if (!comment) {
     SHOW_INFO_POPUP("Please enter a comment.");
     return;
   }
 
-  const task = taskList_data[index];
+  // Find the actual task from the master dataset
+  const task = taskList_data.find((x) => String(x.taskId) === String(taskId));
+
+  if (!task) {
+    SHOW_ERROR_POPUP("Task not found.");
+    return;
+  }
 
   const request = {
     taskId: task.taskId,
@@ -610,21 +921,34 @@ async function taskList_updateStatus(index, newStatus) {
   const response = await CALL_API("UPDATE_TASK_STATUS", request);
 
   if (response?.status) {
-    // Local update
-    if (newStatus === "Move Back") {
-      task.status = "In Progress";
-      task.reviewerComment = comment;
-    } else if (newStatus === "Closed") {
-      task.status = "Closed";
-      task.reviewerComment = comment;
-    } else {
-      task.status = newStatus;
-      task.remarks = comment;
+    // Update local data
+    switch (newStatus) {
+      case "Move Back":
+        task.status = "In Progress";
+        task.reviewerComment = comment;
+        break;
+
+      case "Closed":
+        task.status = "Closed";
+        task.reviewerComment = comment;
+        break;
+
+      default:
+        task.status = newStatus;
+        task.remarks = comment;
+        break;
     }
+
+    // Recalculate canReview because status has changed
+    task.canReview =
+      ((task.status === "Pending" || task.status === "In Progress") &&
+        task.actionOwnerName === selectedDevoteeName) ||
+      (task.status === "In Review" &&
+        task.reviewerName === selectedDevoteeName);
 
     SHOW_SUCCESS_POPUP("Task updated successfully.");
 
-    // Re-apply existing filters and re-render
+    // Refresh UI
     taskList_applyFilters();
   }
 }
