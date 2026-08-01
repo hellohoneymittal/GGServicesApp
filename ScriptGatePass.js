@@ -1,28 +1,29 @@
 let gatePassData = {};
 
 async function openGatePassWindow() {
+  const div = document.getElementById("gatePassHeading_div");
+
   let i;
   const outputData = await CALL_API(
     API_TYPE_CONSTANT.GET_PENDING_GATE_PASSES,
     "",
   );
 
-  if (outputData?.status && outputData.data) {
+  if (outputData?.status && outputData?.data) {
     if (
-      typeof outputData.data === "string" &&
-      outputData.data.includes("ERR")
+      typeof outputData?.data === "string" &&
+      outputData?.data.includes("ERR")
     ) {
-      SHOW_ERROR_POPUP(outputData.data.split("ERR: ")[1]);
+      SHOW_ERROR_POPUP(outputData?.data.split("ERR: ")[1]);
       return;
     }
 
-    if (Object.keys(outputData.data.data).length == 0) {
+    if (Object.keys(outputData?.data?.data).length == 0) {
       SHOW_INFO_POPUP(`No pending gate pass requests!`);
       return;
     }
 
-    const teacherLeavesDiv = document.getElementById("gatePassHeading_div");
-    const teacherLeavesLabel = document.getElementById("gatePassHeading_lbl");
+    SET_USER_NAME_ON_SCREEN(selectedDevoteeName);
     let nextButton = document.getElementById("gatePassNextBtn");
     const checkboxList = document.getElementById("gatePassWindow");
 
@@ -32,9 +33,6 @@ async function openGatePassWindow() {
     nextButton.onclick = function () {
       moveNextStepGatePass();
     };
-
-    teacherLeavesDiv.style.display = "block";
-    teacherLeavesLabel.innerHTML = `${selectedDevoteeName}`;
 
     checkboxList.addEventListener("change", function (e) {
       if (e.target.type === "radio") {
@@ -71,7 +69,7 @@ async function openGatePassWindow() {
 
     grid.appendChild(headerRow);
 
-    Object.entries(outputData.data.data).forEach(([student, details]) => {
+    Object.entries(outputData?.data.data).forEach(([student, details]) => {
       // 🔹 Pending Entries
 
       const row = document.createElement("div");
@@ -194,18 +192,18 @@ async function submitGatePass() {
 
   if (
     outputData?.status &&
-    outputData.data &&
-    typeof outputData.data === "string"
+    outputData?.data &&
+    typeof outputData?.data === "string"
   ) {
-    console.log(outputData.data);
-    if (outputData.data == "ok")
+    console.log(outputData?.data);
+    if (outputData?.data == "ok")
       SHOW_SUCCESS_POPUP("Gatepass approvals submitted Successfully!", () => {
         SHOW_SPECIFIC_DIV("menuPopup");
       });
     else
       SHOW_ERROR_POPUP(
         "Unable to submit gatepass approvals !!\n\n" +
-          outputData.data.split("ERR: ")[1],
+          outputData?.data.split("ERR: ")[1],
       );
   } else SHOW_ERROR_POPUP("Unable to submit gatepass approvals !!");
 
