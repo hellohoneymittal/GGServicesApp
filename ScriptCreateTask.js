@@ -56,7 +56,7 @@ function convertRowsToTaskMaster(data) {
 async function createTaskBtnClick() {
   resetCreateTask();
   const response = await CALL_API_WITH_CACHE("GET_TASK_LIST", {});
-  TASK_MASTER = convertRowsToTaskMaster(response?.data);
+  TASK_MASTER = convertRowsToTaskMaster(response?.data?.taskMasterResponse);
   SET_DIV_TITLE("createTaskPopup", "Create Task");
   const categorySelect = document.getElementById("categorySelect");
   const taskButtonsContainer = document.getElementById("taskButtonsContainer");
