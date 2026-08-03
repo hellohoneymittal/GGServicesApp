@@ -1,4 +1,9 @@
 let studentList = [];
+let studentPasswordViewers = [
+  "Carusakti Mataji",
+  "Ajit Krishna Prabhuji",
+  "Amani Nitai Prabhuji",
+];
 let currentSlotDetails = "";
 let attendanceTimestampMap = new Map();
 let slot_instructions = {
@@ -323,6 +328,9 @@ async function getStudentDetails() {
   const studentSearch = document.getElementById("searchStudent");
   let studentsDetailsArr = [];
 
+  document.getElementById("passwordHeader").style.display =
+    studentPasswordViewers.includes(selectedUser.name) ? "" : "none";
+
   function render(list) {
     studentTbody.innerHTML = "";
 
@@ -333,9 +341,16 @@ async function getStudentDetails() {
             <td>${student[1]}</td>
             <td>${student[2]}</td>
             <td>${student[3]}</td>
-            <td>${student[4]}</td>
+            <td><a href="tel:${student[4]}">${student[4]}</a></td>
             <td>${student[5]}</td>
-            <td>${student[6]}</td>
+            <td><a href="tel:${student[6]}">${student[6]}</a></td>
+            ${
+              studentPasswordViewers.includes(selectedUser.name)
+                ? `
+            <td>${student[7]}</td>
+            `
+                : ""
+            }
         </tr>`;
     });
   }
