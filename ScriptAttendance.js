@@ -316,3 +316,64 @@ function formatMinutes(totalMinutes) {
 
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
 }
+
+async function getStudentDetails() {
+  const outputData = await CALL_API(API_TYPE_CONSTANT.STUDENT_DETAILS, {});
+  const studentTbody = document.getElementById("studentTable");
+  const studentSearch = document.getElementById("searchStudent");
+  let studentsDetailsArr = [];
+
+  function render(list) {
+    studentTbody.innerHTML = "";
+
+    list.forEach((student) => {
+      studentTbody.innerHTML += `
+        <tr>
+            <td>${student[0]}</td>
+            <td>${student[1]}</td>
+            <td>${student[2]}</td>
+            <td>${student[3]}</td>
+            <td>${student[4]}</td>
+            <td>${student[5]}</td>
+            <td>${student[6]}</td>
+        </tr>`;
+    });
+  }
+
+  studentSearch.addEventListener("input", () => {
+    const text = studentSearch.value.toLowerCase();
+
+    const filtered = studentsDetailsArr.filter(
+      (student) =>
+        student[0].toLowerCase().includes(text) ||
+        student[1].toLowerCase().includes(text),
+    );
+
+    render(filtered);
+  });
+
+  if (outputData?.status && outputData.data) {
+    if (typeof outputData.data === "string") {
+      if (outputData.data.includes("ERR"))
+        SHOW_ERROR_POPUP(outputData.data.split("ERR: ")[1]);
+      else SHOW_INFO_POPUP(outputData.data);
+      return;
+    }
+
+    if (outputData.data.output.length == 0) {
+      SHOW_INFO_POPUP(`Unable to fetch Details!`);
+      return;
+    }
+
+    studentsDetailsArr = outputData.data.output;
+
+    console.log(studentsDetailsArr);
+
+    render(studentsDetailsArr);
+
+    SHOW_SPECIFIC_DIV("stdDetailsContainer");
+  } else {
+    SHOW_ERROR_POPUP("Unable to fetch student details!!");
+    return;
+  }
+}
