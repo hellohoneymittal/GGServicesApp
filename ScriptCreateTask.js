@@ -20,7 +20,7 @@ const SEWAKARTA_LIST = [
 ];
 let GET_TASK_LIST_RESPONSE = [];
 let TASK_MASTER = {};
-
+let SF_MAP = {};
 let selectedFile64String = "";
 let selectedfile = "";
 let selectedFileType = "";
@@ -53,10 +53,34 @@ function convertRowsToTaskMaster(data) {
   return result;
 }
 
+let behaviouralTask = [
+  {
+    task: "Student behavioural issues",
+    owner: "",
+    reviewer: "",
+  },
+  {
+    task: "Discipline monitoring",
+    owner: "",
+    reviewer: "",
+  },
+];
 async function createTaskBtnClick() {
   resetCreateTask();
+  toggleTaskSections("");
   const response = await CALL_API_WITH_CACHE("GET_TASK_LIST", {});
   TASK_MASTER = convertRowsToTaskMaster(response?.data?.taskMasterResponse);
+  SF_MAP = CREATE_MAP(
+    response?.data?.stdDatabaseResponse,
+    6,
+    7,
+    (row) => row[1] === "Y",
+  );
+
+  TASK_MASTER["Behavioural Issues"] = {
+    tasks: behaviouralTask,
+  };
+
   SET_DIV_TITLE("createTaskPopup", "Create Task");
   const categorySelect = document.getElementById("categorySelect");
   const taskButtonsContainer = document.getElementById("taskButtonsContainer");
@@ -76,7 +100,7 @@ async function createTaskBtnClick() {
 
   categorySelect.addEventListener("change", () => {
     const selectedCategory = categorySelect.value;
-
+    toggleTaskSections(selectedCategory);
     taskButtonsContainer.innerHTML = "";
     taskDescription.value = "";
     taskOwner.value = "";
@@ -111,6 +135,47 @@ async function createTaskBtnClick() {
   });
 
   SHOW_SPECIFIC_DIV("createTaskPopup");
+}
+
+function toggleTaskSections(category) {
+  const normalDiv = document.getElementById("taskOwnerReviewerDiv");
+  const behaviouralDiv = document.getElementById("behaviouralTaskDiv");
+
+  const isBehavioural = category === "Behavioural Issues";
+
+  if (isBehavioural) {
+    loadBehaviouralStudents();
+  }
+  normalDiv.style.display = isBehavioural ? "none" : "block";
+  behaviouralDiv.style.display = isBehavioural ? "block" : "none";
+}
+
+function loadBehaviouralStudents() {
+  const studentSelect = document.getElementById("behaviouralSelect");
+  const taskOwner = document.getElementById("behaviouralTaskOwner");
+
+  studentSelect.innerHTML = '<option value="">Select Student</option>';
+
+  taskOwner.value = "";
+
+  Object.keys(SF_MAP).forEach((student) => {
+    const option = document.createElement("option");
+    option.value = student;
+    option.textContent = student;
+
+    studentSelect.appendChild(option);
+  });
+
+  studentSelect.onchange = function () {
+    const selectedStudent = this.value;
+    if (!selectedStudent) {
+      taskOwner.value = "";
+      return;
+    }
+    const owner = SF_MAP[selectedStudent];
+    taskOwner.value =
+      owner === "NA" ? "Inviligation and disciplinary Team" : owner;
+  };
 }
 
 function resetCreateTask() {
@@ -341,25 +406,25 @@ function old_taskList_renderTasks(tasks = taskList_data) {
           <div class="taskList_contentInner">
 
             <div class="taskList_details">
+              
+                <div class="taskList_detailBox">
+                  <div class="taskList_detailTitle">
+                    Task Owner
+                  </div>
 
-              <div class="taskList_detailBox">
-                <div class="taskList_detailTitle">
-                  Task Owner
+                  <div class="taskList_detailValue">
+                    ${task.actionOwnerName}
+                  </div>
                 </div>
 
-                <div class="taskList_detailValue">
-                  ${task.actionOwnerName}
-                </div>
-              </div>
+                <div class="taskList_detailBox">
+                  <div class="taskList_detailTitle">
+                    Task Reviewer
+                  </div>
 
-               <div class="taskList_detailBox">
-                <div class="taskList_detailTitle">
-                  Task Reviewer
-                </div>
-
-                <div class="taskList_detailValue">
-                  ${task.reviewerName}
-                </div>
+                  <div class="taskList_detailValue">
+                     ${task.reviewerName}
+                  </div>             
               </div>
 
               <div class="taskList_detailBox">

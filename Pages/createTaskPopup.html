@@ -21,26 +21,45 @@
 
       <div id="taskButtonsContainer"></div>
     </div>
-    <div>
-      <label>Task Owner</label>
-      <input
-        type="text"
-        id="taskOwner"
-        class="grayOut"
-        readonly
-        placeholder="Owner auto selected"
-      />
-    </div>
+    <div id="taskOwnerReviewerDiv">
+      <div>
+        <label>Task Owner</label>
+        <input
+          type="text"
+          id="taskOwner"
+          class="grayOut"
+          readonly
+          placeholder="Owner auto selected"
+        />
+      </div>
 
-    <div>
-      <label>Task Reviewer</label>
-      <input
-        type="text"
-        id="taskReviewer"
-        class="grayOut"
-        readonly
-        placeholder="Reviewer auto selected"
-      />
+      <div>
+        <label>Task Reviewer</label>
+        <input
+          type="text"
+          id="taskReviewer"
+          class="grayOut"
+          readonly
+          placeholder="Reviewer auto selected"
+        />
+      </div>
+    </div>
+    <div id="behaviouralTaskDiv">
+      <div>
+        <label>Select Student</label>
+        <select id="behaviouralSelect"></select>
+      </div>
+
+      <div>
+        <label>Task Reviewer</label>
+        <input
+          type="text"
+          id="behaviouralTaskOwner"
+          class="grayOut"
+          readonly
+          placeholder="Task owner auto selected"
+        />
+      </div>
     </div>
 
     <div style="margin-top: 25px">
