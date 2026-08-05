@@ -2283,3 +2283,11 @@ input[type="radio"] {
   cursor: not-allowed;
   opacity: 0.8;
 }
+
+.popup-content .yellow,
+.japa-container .yellow,
+.confirm-popup-content .yellow {
+  background-color: #f8a333;
+  color: rgb(0, 0, 0);
+  border: 0.1px solid black;
+}
