@@ -340,6 +340,9 @@ async function getStudentDetails(inputLeaveFlag = 0) {
   document.getElementById("parentHeader").style.display =
     inputLeaveFlag == 0 ? "" : "none";
 
+  document.getElementById("showStudentsHeading_lbl").innerHTML =
+    selectedUser.name;
+
   document.getElementById("studentDetailsHeader").innerHTML =
     inputLeaveFlag == 0
       ? "Student Details"
