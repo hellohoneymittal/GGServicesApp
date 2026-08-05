@@ -1,9 +1,5 @@
 function renderMenus(roleData) {
-  SHOW_BUTTON_BY_ADMIN_ROLE(
-    "gatePassApprovalBtn",
-    "Hostel Incharge Role",
-    roleData,
-  );
+  SHOW_BUTTON_BY_ADMIN_ROLE("adminBlock", "Hostel Incharge Role", roleData);
 
   SHOW_SPECIFIC_DIV("menuPopup");
   SET_USER_NAME_ON_SCREEN(selectedUser?.name);
@@ -29,6 +25,7 @@ async function LOAD_HTML_FILE(fileName, containerId = "popupContainer") {
 
 async function INIT_POPUPS() {
   const files = [
+    "studentDetails.html",
     "oldDevelopment.html",
     "hostelCheckoutRequestPopup.html",
     "gatePassApproval.html",

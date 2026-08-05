@@ -1,0 +1,38 @@
+<!doctype html>
+<div class="popup" id="stdDetailsContainer">
+  <div class="popup-content scrollable-content">
+    <img
+      src="https://drive.google.com/thumbnail?id=15-SQ9oW0U2eX2vsWmyxvmhwu9Q1QgOZm&sz=w500"
+      alt="School Logo"
+    />
+    <div class="user-info-block">
+      <p id="showStudentsHeading_lbl"></p>
+    </div>
+    <h2 id="studentDetailsHeader">Student Details</h2>
+    <input
+      type="text"
+      id="searchStudent"
+      placeholder="Search by student or class..."
+    />
+
+    <div class="collection-table-container scrollable-content-table">
+      <table>
+        <thead class="table-header">
+          <tr>
+            <th>Name</th>
+            <th>Class</th>
+            <th id="hostelHeader" style="display: none">Hosteler</th>
+            <th id="parentHeader" style="display: none">Parents' Details</th>
+            <th id="passwordHeader" style="display: none">Password</th>
+          </tr>
+        </thead>
+
+        <tbody id="studentTable"></tbody>
+      </table>
+    </div>
+
+    <div class="button-row">
+      <button class="red" onclick="SHOW_SPECIFIC_DIV('menuPopup')">Back</button>
+    </div>
+  </div>
+</div>

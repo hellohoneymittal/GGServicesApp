@@ -176,6 +176,28 @@
             <div class="accordion-container">
               <div class="accordion-item">
                 <button class="accordion-header">
+                  Invigilation Service
+                  <span class="icon">▶</span>
+                </button>
+                <div class="accordion-content">
+                  <button class="green" onclick="getStudentDetails(1)">
+                    Check Students on Leave
+                  </button>
+
+                  <button class="green" onclick="openFreeSlotsWindow()">
+                    Check Free Classes
+                  </button>
+
+                  <button class="green" onclick="getStudentDetails()">
+                    Check Student Details
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-container">
+              <div class="accordion-item">
+                <button class="accordion-header">
                   Hostel Residents Attendance System
                   <span class="icon">▶</span>
                 </button>
@@ -221,18 +243,24 @@
               </button>
             </div>
 
-            <button class="green" onclick="openFreeSlotsWindow()">
-              Check Free Classes
-            </button>
-
-            <button
-              class="green"
-              id="gatePassApprovalBtn"
-              onclick="openGatePassWindow()"
-              style="display: none"
-            >
-              Student Gate Pass Approval
-            </button>
+            <div>
+              <div class="accordion-item">
+                <button class="accordion-header">
+                  Administration
+                  <span class="icon">▶</span>
+                </button>
+                <div class="accordion-content">
+                  <button
+                    class="green"
+                    onclick="openGatePassWindow()"
+                    style="display: none"
+                    id="adminBlock"
+                  >
+                    Student Gate Pass Approval
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <button class="green" onclick="contacts()" style="display: none">
               Contacts

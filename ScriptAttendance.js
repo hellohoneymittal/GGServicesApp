@@ -1,4 +1,9 @@
 let studentList = [];
+let studentPasswordViewers = [
+  "Carusakti Mataji",
+  "Ajit Krishna Prabhuji",
+  "Amani Nitai Prabhuji",
+];
 let currentSlotDetails = "";
 let attendanceTimestampMap = new Map();
 let slot_instructions = {
@@ -315,4 +320,82 @@ function formatMinutes(totalMinutes) {
   }
 
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
+}
+
+async function getStudentDetails(inputLeaveFlag = 0) {
+  const outputData = await CALL_API(API_TYPE_CONSTANT.STUDENT_DETAILS, {
+    leaveFlag: inputLeaveFlag,
+  });
+  const studentTbody = document.getElementById("studentTable");
+  const studentSearch = document.getElementById("searchStudent");
+  let studentsDetailsArr = [];
+
+  document.getElementById("passwordHeader").style.display =
+    studentPasswordViewers.includes(selectedUser.name) && inputLeaveFlag == 0
+      ? ""
+      : "none";
+
+  document.getElementById("hostelHeader").style.display =
+    inputLeaveFlag == 0 ? "" : "none";
+  document.getElementById("parentHeader").style.display =
+    inputLeaveFlag == 0 ? "" : "none";
+
+  document.getElementById("studentDetailsHeader").innerHTML =
+    inputLeaveFlag == 0
+      ? "Student Details"
+      : `Student Leaves on: ${outputData.data.leave_dt}`;
+
+  function render(list) {
+    studentTbody.innerHTML = "";
+
+    list.forEach((student) => {
+      studentTbody.innerHTML += `
+        <tr>
+            <td>${student[0]}</td>
+            <td>${student[1]}</td>
+            ${
+              inputLeaveFlag == 0
+                ? `<td>${student[2]}</td><td>${student[3]}<br/><a href="tel:${student[4]}">${student[4]}</a><br/><br/>${student[5]}<br/><a href="tel:${student[6]}">${student[6]}</a></td> ${studentPasswordViewers.includes(selectedUser.name) ? `<td>${student[7]}</td>` : ""}`
+                : ""
+            }
+        </tr>`;
+    });
+  }
+
+  studentSearch.addEventListener("input", () => {
+    const text = studentSearch.value.toLowerCase();
+
+    const filtered = studentsDetailsArr.filter(
+      (student) =>
+        student[0].toLowerCase().includes(text) ||
+        student[1].toLowerCase().includes(text),
+    );
+
+    render(filtered);
+  });
+
+  if (outputData?.status && outputData.data) {
+    if (typeof outputData.data === "string") {
+      if (outputData.data.includes("ERR"))
+        SHOW_ERROR_POPUP(outputData.data.split("ERR: ")[1]);
+      else SHOW_INFO_POPUP(outputData.data);
+      return;
+    }
+
+    if (outputData.data.output.length == 0) {
+      SHOW_INFO_POPUP(`Unable to fetch Details!`);
+      return;
+    }
+
+    studentsDetailsArr = outputData.data.output;
+
+    console.log(studentsDetailsArr);
+
+    render(studentsDetailsArr);
+
+    SHOW_SPECIFIC_DIV("stdDetailsContainer");
+  } else {
+    SHOW_ERROR_POPUP("Unable to fetch student details!!");
+    return;
+  }
 }
