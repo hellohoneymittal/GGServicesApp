@@ -3,6 +3,7 @@ let studentPasswordViewers = [
   "Carusakti Mataji",
   "Ajit Krishna Prabhuji",
   "Amani Nitai Prabhuji",
+  "Kasturi Keshavi Mataji",
 ];
 let currentSlotDetails = "";
 let attendanceTimestampMap = new Map();
