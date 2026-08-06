@@ -1,3 +1,5 @@
+//This script is to handle the leaves for hostel students submitted by the admin
+
 let hostelStudents = [];
 let selectedHostelStudents = {};
 
