@@ -1,0 +1,63 @@
+<!doctype html>
+<div class="popup" id="hostelLeavesContainer">
+  <div class="popup-content scrollable-content">
+    <img
+      src="https://drive.google.com/thumbnail?id=15-SQ9oW0U2eX2vsWmyxvmhwu9Q1QgOZm&sz=w500"
+      alt="School Logo"
+    />
+    <div class="user-info-block">
+      <p id="hostelLeavessHeading_lbl"></p>
+    </div>
+    <h2>Submit Leaves for Hostelers</h2>
+    <input
+      type="text"
+      id="searchHostelStudent"
+      placeholder="Search by student name"
+    />
+
+    <h3>Search Results</h3>
+
+    <div class="collection-table-container scrollable-content-table">
+      <table>
+        <thead class="table-header">
+          <tr>
+            <th>Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Comments</th>
+          </tr>
+        </thead>
+
+        <tbody id="hostelStudentTable"></tbody>
+      </table>
+    </div>
+
+    <h3>Selected Students</h3>
+
+    <div class="collection-table-container scrollable-content-table">
+      <table>
+        <thead class="table-header">
+          <tr>
+            <th>Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Comments</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+
+        <tbody id="selectedHostelStudentTable"></tbody>
+      </table>
+    </div>
+
+    <div class="button-row">
+      <button class="purple" onclick="SHOW_SPECIFIC_DIV('menuPopup')">
+        Back
+      </button>
+      <button id="hostelLeavesResetBtn" class="red" onclick="">Reset</button>
+      <button id="hostelLeavesSubmitBtn" class="green" onclick="" disabled>
+        Submit
+      </button>
+    </div>
+  </div>
+</div>

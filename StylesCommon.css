@@ -1740,6 +1740,11 @@ input[type="radio"] {
   animation: shake 0.2s ease-in-out 2;
 }
 
+.error {
+  color: red;
+  font-size: 16px;
+}
+
 @keyframes shake {
   0% {
     transform: translateX(0);

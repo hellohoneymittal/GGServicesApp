@@ -1,5 +1,6 @@
 function renderMenus(roleData) {
   SHOW_BUTTON_BY_ADMIN_ROLE("adminBlock", "Hostel Incharge Role", roleData);
+  SHOW_BUTTON_BY_ADMIN_ROLE("hostelLeaves", "Hostel Incharge Role", roleData);
 
   SHOW_SPECIFIC_DIV("menuPopup");
   SET_USER_NAME_ON_SCREEN(selectedUser?.name);
@@ -32,6 +33,7 @@ async function INIT_POPUPS() {
     "attendance.html",
     "createTaskPopup.html",
     "taskListPopup.html",
+    "hostelLeaves.html",
   ];
 
   for (const file of files) {
