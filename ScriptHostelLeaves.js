@@ -305,9 +305,7 @@ function refreshSelectedTable() {
 
             <td>${student.name}</td>
 
-            <td>${formatDateDisplayLeaves(student.start)}</td>
-            
-            <td>${formatDateDisplayLeaves(student.end)}</td>
+            <td>${formatDateDisplayLeaves(student.start)}<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to<br/>${formatDateDisplayLeaves(student.end)}</td>
 
             <td>${student.comments}</td>
 
