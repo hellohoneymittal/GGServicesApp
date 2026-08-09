@@ -55,10 +55,17 @@ function defineEventListeners() {
         if (outputData.data.includes("ERR"))
           SHOW_ERROR_POPUP(outputData.data.split("ERR: ")[1]);
         else
-          SHOW_SUCCESS_POPUP(
-            "Leaves Submitted Successfully!",
-            SHOW_SPECIFIC_DIV("menuPopup"),
-          );
+          SHOW_SUCCESS_POPUP("Leaves Submitted Successfully!", () => {
+            for (let i = 0; i < leaveList.length; i++) {
+              leaveList[i]["whatsapp"] = 1;
+            }
+
+            CALL_API_WITHOUT_LOADING(
+              API_TYPE_CONSTANT.SUBMIT_STUDENT_LEAVES,
+              leaveList,
+            );
+            SHOW_SPECIFIC_DIV("menuPopup");
+          });
         return;
       }
     } else {
@@ -253,6 +260,8 @@ function getRowData(student, row) {
     end: row.querySelector(".endDate").value,
 
     comments: row.querySelector(".comments").value,
+
+    whatsapp: 0,
   };
 }
 
