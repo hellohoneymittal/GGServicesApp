@@ -33,7 +33,7 @@ let slot_instructions = {
 };
 let time_slots = {
   Mon: {
-    "19:35 - 23:00": "Sleeping Slot",
+    "19:50 - 23:00": "Sleeping Slot",
     "04:00 - 05:30": "Wake up Slot",
     "05:35 - 06:40": "Morning Program Slot",
   },
@@ -43,7 +43,7 @@ let time_slots = {
     "05:05 - 06:10": "Morning Program Slot",
   },
   Others: {
-    "19:35 - 23:00": "Sleeping Slot",
+    "19:50 - 23:00": "Sleeping Slot",
     "03:30 - 05:00": "Wake up Slot",
     "05:05 - 06:10": "Morning Program Slot",
   },
