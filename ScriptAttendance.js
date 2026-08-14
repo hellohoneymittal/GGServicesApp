@@ -331,23 +331,25 @@ async function getStudentDetails(inputLeaveFlag = 0) {
   const studentSearch = document.getElementById("searchStudent");
   let studentsDetailsArr = [];
 
-  document.getElementById("passwordHeader").style.display =
-    studentPasswordViewers.includes(selectedUser.name) && inputLeaveFlag == 0
-      ? ""
-      : "none";
+  try {
+    document.getElementById("passwordHeader").style.display =
+      studentPasswordViewers.includes(selectedUser.name) && inputLeaveFlag == 0
+        ? ""
+        : "none";
 
-  document.getElementById("hostelHeader").style.display =
-    inputLeaveFlag == 0 ? "" : "none";
-  document.getElementById("parentHeader").style.display =
-    inputLeaveFlag == 0 ? "" : "none";
+    document.getElementById("hostelHeader").style.display =
+      inputLeaveFlag == 0 ? "" : "none";
+    document.getElementById("parentHeader").style.display =
+      inputLeaveFlag == 0 ? "" : "none";
 
-  document.getElementById("showStudentsHeading_lbl").innerHTML =
-    selectedUser.name;
+    document.getElementById("showStudentsHeading_lbl").innerHTML =
+      selectedUser.name;
 
-  document.getElementById("studentDetailsHeader").innerHTML =
-    inputLeaveFlag == 0
-      ? "Student Details"
-      : `Student Leaves on: ${outputData.data.leave_dt}`;
+    document.getElementById("studentDetailsHeader").innerHTML =
+      inputLeaveFlag == 0
+        ? "Student Details"
+        : `Student Leaves on: ${outputData.data.leave_dt}`;
+  } catch (Exception) {}
 
   function render(list) {
     studentTbody.innerHTML = "";
