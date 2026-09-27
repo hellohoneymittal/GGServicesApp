@@ -69,128 +69,143 @@ function populateStudentMultiSelectDropdown(outId, inArr, name) {
 }
 
 async function openAttendanceWindow(view = 0) {
-  //28.657501589771897, 77.43753484576277
-  const schoolLat = 28.657501589771897; // your school latitude
-  const schoolLng = 77.43753484576277; // your school longitude
-  const allowedRadius = 150; // meters
-  let now = new Date();
-  let ignoreTeachers = [];
-  let result = 0;
-  currentSlotDetails = getCurrentTimeSlotInstructions();
-  let formOpenTime = now.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  const instructionsBox = document.getElementById("instructionsBox");
-  let attendanceHeading = document.getElementById("attendanceHeading");
-  let markAttButton = document.getElementById("mark_attendance_button");
-  let instructionsRoot = document.querySelector(".instructions");
+  // Start loader immediately on button click
+  IsLoading(true);
 
-  console.log(formOpenTime);
-  attendanceTimestampMap.clear();
-  attendanceTimestampMap.set(selectedUser.name, formOpenTime);
+  try {
+    //28.657501589771897, 77.43753484576277
+    const schoolLat = 28.657501589771897;
+    const schoolLng = 77.43753484576277;
+    const allowedRadius = 150;
 
-  if (view == 0) {
-    if (currentSlotDetails == null) {
-      SHOW_INFO_POPUP(
-        "⚠️ Cannot mark attendance outside of defined slot hours!",
-      );
-      return;
-    }
+    let now = new Date();
+    let ignoreTeachers = [];
+    let result = 0;
 
-    //Check current location
-    if (!ignoreTeachers.includes(selectedUser.name)) {
-      try {
-        result = await checkLocation(schoolLat, schoolLng, allowedRadius);
-      } catch (error) {
-        console.error(error);
-        if (error.message)
-          SHOW_ERROR_POPUP(
-            `❌ Action Disallowed ❌\n\nERROR: ${error.message}`,
-          );
+    currentSlotDetails = getCurrentTimeSlotInstructions();
+
+    let formOpenTime = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const instructionsBox = document.getElementById("instructionsBox");
+    let attendanceHeading = document.getElementById("attendanceHeading");
+    let markAttButton = document.getElementById("mark_attendance_button");
+    let instructionsRoot = document.querySelector(".instructions");
+
+    console.log(formOpenTime);
+
+    attendanceTimestampMap.clear();
+    attendanceTimestampMap.set(selectedUser.name, formOpenTime);
+
+    if (view == 0) {
+      if (currentSlotDetails == null) {
+        SHOW_INFO_POPUP(
+          "⚠️ Cannot mark attendance outside of defined slot hours!",
+        );
         return;
       }
 
-      if (result !== 1) {
-        SHOW_ERROR_POPUP(
-          `❌ Action Disallowed ❌\n\n⚠️ Your current location ${result.split("%")[1]} is ${result.split("%")[0]} away from Gurukul.\n\nAttendance can only be marked within the hostel campus.`,
-        );
-        return; // ✅ NOW this works as expected
+      // Check current location
+      if (!ignoreTeachers.includes(selectedUser.name)) {
+        try {
+          result = await checkLocation(schoolLat, schoolLng, allowedRadius);
+        } catch (error) {
+          console.error(error);
+
+          if (error.message)
+            SHOW_ERROR_POPUP(
+              `❌ Action Disallowed ❌\n\nERROR: ${error.message}`,
+            );
+
+          return;
+        }
+
+        if (result !== 1) {
+          SHOW_ERROR_POPUP(
+            `❌ Action Disallowed ❌\n\n⚠️ Your current location ${result.split("%")[1]} is ${result.split("%")[0]} away from Gurukul.\n\nAttendance can only be marked within the hostel campus.`,
+          );
+
+          return;
+        }
+
+        console.log(`Inside Gurukul!`);
       }
 
-      console.log(`Inside Gurukul!`);
+      console.log(currentSlotDetails.name);
+      console.log(selectedUser);
+
+      instructionsBox.innerHTML = "";
+
+      currentSlotDetails.instructions.forEach((instruction) => {
+        const li = document.createElement("li");
+        li.textContent = instruction;
+        instructionsBox.appendChild(li);
+      });
+
+      attendanceHeading.innerHTML = "Hostel Attendance";
+      markAttButton.hidden = false;
+      instructionsRoot.hidden = false;
+    } else {
+      attendanceHeading.innerHTML = "Hostel Residents";
+      markAttButton.hidden = true;
+      instructionsRoot.hidden = true;
     }
 
-    console.log(currentSlotDetails.name);
-    console.log(selectedUser);
-
-    // CLEAR OLD DATA
-    instructionsBox.innerHTML = "";
-
-    // ADD INSTRUCTIONS
-    currentSlotDetails.instructions.forEach((instruction) => {
-      const li = document.createElement("li");
-
-      li.textContent = instruction;
-
-      instructionsBox.appendChild(li);
+    const outputData = await CALL_API(API_TYPE_CONSTANT.GET_STUDENT_LIST, {
+      slotName: view == 0 ? currentSlotDetails.name : "",
+      viewOnly: view,
     });
 
-    attendanceHeading.innerHTML = "Hostel Attendance";
-    markAttButton.hidden = false;
-    instructionsRoot.hidden = false;
-  } else {
-    attendanceHeading.innerHTML = "Hostel Residents";
-    markAttButton.hidden = true;
-    instructionsRoot.hidden = true;
-  }
+    if (outputData?.status && outputData.data) {
+      if (typeof outputData.data === "string") {
+        if (outputData.data.includes("ERR"))
+          SHOW_ERROR_POPUP(outputData.data.split("ERR: ")[1]);
+        else SHOW_INFO_POPUP(outputData.data);
 
-  const outputData = await CALL_API(API_TYPE_CONSTANT.GET_STUDENT_LIST, {
-    slotName: view == 0 ? currentSlotDetails.name : "",
-    viewOnly: view,
-  });
+        return;
+      }
 
-  if (outputData?.status && outputData.data) {
-    if (typeof outputData.data === "string") {
-      if (outputData.data.includes("ERR"))
-        SHOW_ERROR_POPUP(outputData.data.split("ERR: ")[1]);
-      else SHOW_INFO_POPUP(outputData.data);
+      studentList = outputData.data;
+
+      populateStudentMultiSelectDropdown(
+        "dynamic-student-list",
+        studentList,
+        "studentList",
+      );
+    } else {
+      SHOW_ERROR_POPUP("Unable to fetch the students in the hostel!!");
+
       return;
     }
 
-    studentList = outputData.data;
-    populateStudentMultiSelectDropdown(
-      "dynamic-student-list",
-      studentList,
-      "studentList",
-    );
-  } else {
-    SHOW_ERROR_POPUP("Unable to fetch the students in the hostel!!");
-    return;
-  }
+    document.getElementById("selectStudentsHeading_lbl").innerHTML =
+      selectedUser.name;
 
-  document.getElementById("selectStudentsHeading_lbl").innerHTML =
-    selectedUser.name;
-  document.getElementById("student-list").innerHTML =
-    `Student List (${studentList.length})`;
+    document.getElementById("student-list").innerHTML =
+      `Student List (${studentList.length})`;
 
-  document
-    .getElementById("dynamic-student-list")
-    .addEventListener("change", function (e) {
-      if (e.target.type === "checkbox") {
-        const value = e.target.value;
-        const timestamp = new Date();
+    document
+      .getElementById("dynamic-student-list")
+      .addEventListener("change", function (e) {
+        if (e.target.type === "checkbox") {
+          const value = e.target.value;
+          const timestamp = new Date();
 
-        if (e.target.checked) {
-          attendanceTimestampMap.set(value, timestamp);
-        } else {
-          attendanceTimestampMap.delete(value);
+          if (e.target.checked) {
+            attendanceTimestampMap.set(value, timestamp);
+          } else {
+            attendanceTimestampMap.delete(value);
+          }
         }
-      }
-    });
+      });
 
-  SHOW_SPECIFIC_DIV("stdAttendanceContainer");
+    SHOW_SPECIFIC_DIV("stdAttendanceContainer");
+  } finally {
+    IsLoading(false);
+  }
 }
 
 function getCurrentTimeSlotInstructions() {
