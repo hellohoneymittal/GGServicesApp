@@ -1,4 +1,9 @@
 //api constant
+const GG_LAT = 28.657501589771897;
+const GG_LONG = 77.43753484576277;
+
+const HKB_LAT = 28.655359027467814;
+const HKB_LONG = 77.44110269248928;
 
 const APPLICATION_URL =
   "https://script.google.com/macros/s/AKfycbxV_ORvmxii08sHXnY3_c7DquK12TCjdMoEOhIuOiRXM1FIgTFUyX4F0pwBqUgiNHQc/exec";

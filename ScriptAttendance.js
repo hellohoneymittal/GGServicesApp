@@ -49,12 +49,16 @@ let time_slots = {
   },
 };
 
-function populateStudentMultiSelectDropdown(outId, inArr, name) {
+function populateStudentMultiSelectDropdown(outId, inArr, name, category = "") {
   const container = document.getElementById(outId);
-  container.innerHTML = ""; // clear old list
+  container.innerHTML = "";
 
-  inArr.forEach((student, index) => {
-    const studentId = `student-${index}`; // unique id per student
+  const filteredStudents = category
+    ? inArr.filter((student) => student.includes(category))
+    : inArr;
+
+  filteredStudents.forEach((student, index) => {
+    const studentId = `student-${index}`;
 
     const option = document.createElement("div");
     option.classList.add("options");
@@ -66,16 +70,20 @@ function populateStudentMultiSelectDropdown(outId, inArr, name) {
 
     container.appendChild(option);
   });
+
+  return filteredStudents.length; // Return the count of students displayed
 }
 
 async function openAttendanceWindow(view = 0) {
   // Start loader immediately on button click
   IsLoading(true);
 
+  let user_split_arr = selectedUser.name.split(" ");
+  let user_gender = user_split_arr[user_split_arr.length - 1];
+
   try {
-    //28.657501589771897, 77.43753484576277
-    const schoolLat = 28.657501589771897;
-    const schoolLng = 77.43753484576277;
+    const schoolLat = user_gender == "Prabhuji" ? GG_LAT : HKB_LAT;
+    const schoolLng = user_gender == "Prabhuji" ? GG_LONG : HKB_LONG;
     const allowedRadius = 150;
 
     let now = new Date();
@@ -159,6 +167,8 @@ async function openAttendanceWindow(view = 0) {
       viewOnly: view,
     });
 
+    let studentCount = 0;
+
     if (outputData?.status && outputData.data) {
       if (typeof outputData.data === "string") {
         if (outputData.data.includes("ERR"))
@@ -170,10 +180,11 @@ async function openAttendanceWindow(view = 0) {
 
       studentList = outputData.data;
 
-      populateStudentMultiSelectDropdown(
+      studentCount = populateStudentMultiSelectDropdown(
         "dynamic-student-list",
         studentList,
         "studentList",
+        view == 0 ? user_gender : "",
       );
     } else {
       SHOW_ERROR_POPUP("Unable to fetch the students in the hostel!!");
@@ -185,7 +196,7 @@ async function openAttendanceWindow(view = 0) {
       selectedUser.name;
 
     document.getElementById("student-list").innerHTML =
-      `Student List (${studentList.length})`;
+      `Student List (${studentCount})`;
 
     document
       .getElementById("dynamic-student-list")
